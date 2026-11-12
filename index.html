@@ -41,8 +41,15 @@ a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline}
 :focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
 
-.app{display:grid;grid-template-columns:minmax(440px,500px) 1fr;height:100%}
-aside{background:var(--paper);overflow-y:auto;padding-block:32px 48px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:24px;display:flex;flex-direction:column;gap:20px}
+.app{display:grid;grid-template-columns:var(--sbw,480px) 10px minmax(0,1fr);height:100%}
+.gutter{cursor:col-resize;position:relative;touch-action:none;background:transparent;z-index:5}
+.gutter::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:2px;background:var(--rule);border-radius:2px;transition:background .15s,width .15s,left .15s}
+.gutter:hover::after,.gutter.drag::after,.gutter:focus-visible::after{background:var(--accent);width:4px;left:3px}
+.gutter:focus-visible{outline:none}
+body.resizing{cursor:col-resize;user-select:none}
+body.resizing .app>*{pointer-events:none}
+body.resizing .app>.gutter{pointer-events:auto}
+aside{container-type:inline-size;min-width:0;overflow-wrap:anywhere;background:var(--paper);overflow-y:auto;overflow-x:hidden;padding-block:32px 48px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:24px;display:flex;flex-direction:column;gap:20px}
 main{display:grid;grid-template-rows:minmax(340px,1.4fr) minmax(260px,1fr);gap:16px;padding:16px 16px 16px 0;padding-right:max(14px,env(safe-area-inset-right,0px));min-width:0;min-height:0}
 
 /* header */
@@ -96,6 +103,11 @@ dl.facts dt,dl.facts dd{padding:12px 0;border-bottom:.5px solid var(--rule)}
 dl.facts dt{color:var(--ink-2);padding-right:14px;font-size:14px}
 dl.facts dd{margin:0;font-variant-numeric:tabular-nums;text-align:right;font-weight:500}
 dl.facts dt:nth-last-child(2),dl.facts dd:last-child{border-bottom:0}
+dl.facts .legal-in{width:100%;max-width:170px;font:500 15px var(--f-body);text-align:right;padding:5px 8px;border:.5px solid var(--rule);border-radius:6px;background:transparent;color:var(--ink)}
+dl.facts .legal-note{font:400 12.5px/1.4 var(--f-body);color:var(--ink-2);text-align:left;grid-column:1/-1;padding-top:6px}
+dl.facts .legal-note a{color:var(--accent)}
+dl.facts .legal-paste{display:block;width:100%;box-sizing:border-box;margin:8px 0 6px;font:400 13px var(--f-body);padding:6px 8px;border:.5px solid var(--rule);border-radius:6px;background:transparent;color:var(--ink);resize:vertical}
+dl.facts .legal-btn{font:600 13px var(--f-body);padding:6px 12px;border-radius:6px;border:0;background:var(--accent-soft);color:var(--accent);cursor:pointer}
 .ctrl{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;font-size:15px;padding:2px 0}
 select,.ctrl input[type=number]{font:15px var(--f-body);padding:7px 10px;border:0;border-radius:9px;background:var(--fill);color:var(--ink)}
 .ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
@@ -167,8 +179,21 @@ details[open] summary::after{transform:rotate(90deg)}
 .leaflet-bar{border:0!important;border-radius:12px!important;overflow:hidden;box-shadow:0 0 0 .5px var(--hair),0 4px 14px rgba(0,0,0,.12)!important}
 .leaflet-bar a{background:var(--glass)!important;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);color:var(--ink)!important;border-bottom:.5px solid var(--hair)!important;width:34px!important;height:34px!important;line-height:34px!important}
 .leaflet-control-attribution{background:var(--glass)!important;border-radius:8px 0 0 0;color:var(--ink-2)!important}
-@media (max-width:900px){
+@container (max-width:380px){
+  dl.facts{grid-template-columns:1fr}
+  dl.facts dt{border-bottom:0;padding-bottom:0}
+  dl.facts dd{text-align:left;padding-top:4px}
+  dl.facts .legal-in{max-width:none}
+  .ctrl{grid-template-columns:1fr}
+  ul.law li{grid-template-columns:1fr}
+  ul.checks li{grid-template-columns:1fr}
+  .zonecard{grid-template-columns:1fr}
+  table.regs td:nth-child(2){white-space:normal}
+  .seg{flex-wrap:wrap}
+}
+@media (max-width:640px){
   .app{grid-template-columns:1fr;height:auto}
+  .gutter{display:none}
   aside{padding-right:max(16px,env(safe-area-inset-right,0px));padding-left:max(16px,env(safe-area-inset-left,0px))}
   main{grid-template-rows:440px auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
   .bottom{grid-template-columns:1fr;grid-template-rows:300px 340px}
@@ -245,6 +270,8 @@ details[open] summary::after{transform:rotate(90deg)}
 
   <section class="blk" aria-label="Regulations">
     <p class="eyebrow"><span class="step">7</span>Regulations applied <span class="ref" id="regref"></span></p>
+    <div class="ctrl" id="necBox" hidden><label for="necMode">NEC exemption for</label>
+      <select id="necMode"><option value="addition">Addition to dwelling</option><option value="deck">Deck, porch, patio, veranda</option><option value="accessory">Accessory building</option></select></div>
     <table class="regs" id="regs"></table>
     <div class="hint">These are the limits the existing building is checked against. Edit a value to test a variance. Click a lot line in the plan to change whether it is front, side, flankage or rear.</div>
     <div class="note" id="notes"></div>
@@ -265,10 +292,11 @@ details[open] summary::after{transform:rotate(90deg)}
 
   <p class="disclaimer">Lot lines, zoning and dimensions come from City of Hamilton open GIS services and are approximate. Site-specific exceptions, holding provisions, general provisions (Section 4) and special figures can change these limits. Confirm with a Zoning Verification Certificate before relying on any result.</p>
 </aside>
+<div class="gutter" id="gutter" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-valuemin="300" aria-valuemax="900" tabindex="0" title="Drag to resize (double-click to reset)"></div>
 
 <main>
   <div class="view" id="v3d">
-    <div class="overlay tl"><span class="tag example" id="exampleTag">Example lot · search an address to begin</span></div>
+    <div class="overlay tl"><span class="tag example" id="exampleTag">Example lot · search an address to begin</span><span class="tag example" id="necTag3d" hidden>Showing NEC permit-exemption setbacks · not zoning</span></div>
     <div class="overlay tr">
       <button class="vbtn" data-cam="iso">Iso</button>
       <button class="vbtn" data-cam="street">Street</button>
@@ -287,7 +315,7 @@ details[open] summary::after{transform:rotate(90deg)}
   <div class="bottom">
     <div class="view"><div id="map"></div></div>
     <div class="view"><svg id="plan" role="img" aria-label="Plan view of lot, setbacks and existing buildings"></svg>
-      <div class="overlay tl"><span class="tag">Plan · tap a lot line to change its type</span></div></div>
+      <div class="overlay tl"><span class="tag">Plan · tap a lot line to change its type</span><span class="tag example" id="necTagPlan" hidden>Showing NEC permit-exemption setbacks · not zoning</span></div></div>
   </div>
 </main>
 </div>
@@ -314,10 +342,45 @@ const SVC = {
   zoningCA:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Zoning/MapServer/8",
   zoningMap:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Zoning/MapServer",
   propertyMap:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Property/MapServer",
+  lotcon:  "https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Property/MapServer/15",
+  regplan: "https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Development/MapServer/6",
+  pra:     "https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Zoning/MapServer/13",
   streets: "https://spatialsolutions.hamilton.ca/webgis/rest/services/General/SearchLayers/MapServer/3",
   buildings:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Topographic/MapServer/6",
   contours:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Topographic/MapServer/5",
   railways:"https://spatialsolutions.hamilton.ca/webgis/rest/services/General/Topographic/MapServer/3"
+};
+const FORMER={
+  "6593":{label:"City of Hamilton Zoning By-law 6593 (former City of Hamilton)",short:"6593",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/hamilton-zoning-by-law-6593-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026",secs:"Sections 7, 7A, 8, 8A, 8B, 9, 9A, 10, 18 and 18A",enc:"Section 18"},
+  "87-57":{label:"Town of Ancaster Zoning By-law 87-57 (former Town of Ancaster)",short:"87-57",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/ancaster-zoning-by-law-87-57-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026",secs:"Sections 7, 8, 10 to 15, 39 and Schedule C",enc:"Subsection 7.12"},
+  "3581-86":{label:"Town of Dundas Zoning By-law 3581-86 (former Town of Dundas)",short:"3581-86",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/dundas-zoning-by-law-3581-86-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026",secs:"Sections 6, 7, 8, 9, 10, 11 and 12",enc:"Subsection 6.6"},
+  "3692-92":{label:"City of Stoney Creek Zoning By-law 3692-92 (former City of Stoney Creek)",short:"3692-92",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/stoney-creek-zoning-by-law-3692-92-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026",secs:"Parts 4 and 6 (Sections 4.5, 4.10, 4.19, 6.1 to 6.9)",enc:"Section 4.19"},
+  "464":{label:"Township of Glanbrook Zoning By-law 464 (former Township of Glanbrook)",short:"464",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/glanbrook-zoning-by-law-464-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026",secs:"Sections 7, 11 to 16 and 18",enc:"Subsection 7.26"},
+  "90-145-Z":{label:"Town of Flamborough Zoning By-law 90-145-Z (former Town of Flamborough)",short:"90-145-Z",
+    url:"https://www.hamilton.ca/sites/default/files/2026-10/flamborough-zoning-by-law-90-145z-consolidation-oct2026.pdf",
+    page:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-by-laws-former-communities",
+    asof:"consolidated as of October 2026 (zone sections dated February 2023)",secs:"Sections 5 to 11",enc:"Subsection 5.30"}
+};
+const LOOKUP={
+  search:"https://www.hamilton.ca/city-council/by-laws-enforcement/search-by-laws",
+  map:"https://www.hamilton.ca/build-invest-grow/planning-development/zoning/interactive-zoning-mapping",
+  verify:"https://www.hamilton.ca/build-invest-grow/starting-small-business/one-stop-business/zoning-verification-and-property-report",
+  email:"ZoningInquiry@hamilton.ca"
 };
 const BYLAW_URL = "https://www.hamilton.ca/build-invest-grow/planning-development/zoning/zoning-law-05-200";
 
@@ -361,6 +424,175 @@ const ZONES = {
   P7:{name:"Conservation/Hazard Land – Rural (P7) Zone", section:"7.7", restricted:true},
   P8:{name:"Conservation/Hazard Land – Rural (P8) Zone", section:"7.8", restricted:true}
 };
+
+/* ---------------- Former City of Hamilton Zoning By-law 6593 (consolidated October 2026): residential districts ----------------
+   Read from the City's consolidation PDF. Distances in metres, areas in square metres. Heights are the metre limit; the by-law also limits storeys. */
+const H6593=(o)=>({bylaw:"6593",url:FORMER["6593"].url,...o});
+ZONES["H6593:AA"]=H6593({name:"Agricultural (AA) District",section:"7A",
+  types:{single:{ref:"7A(2)–(4)",lotArea:12000,lotWidth:60,front:12,side:4.5,flank:4.5,rear:10.5,height:11}},
+  notes:["Building height is limited to 2½ storeys and 11.0 m (7A(2)). Yards are those of the “A” District in Section 7(3). A single family dwelling is allowed as in Section 8(1)."]});
+ZONES["H6593:B"]=H6593({name:"Suburban Agriculture and Residential (B) District",section:"8",
+  types:{single:{ref:"8(2)–(4)",lotArea:1100,lotWidth:20,front:12,side:3,flank:3,rear:9,height:11}},
+  notes:["Single family dwelling only (with up to three lodgers). Height is limited to 2½ storeys and 11.0 m (8(2))."]});
+ZONES["H6593:B-1"]=H6593({name:"Suburban Agriculture and Residential (B-1) District",section:"8A",
+  types:{single:{ref:"8A(2)–(4)",lotArea:690,lotWidth:15,front:7.5,side:1.8,flank:1.8,rear:7.5,height:11}},
+  notes:["Uses are those of the B District. Height is limited to 2½ storeys and 11.0 m."]});
+ZONES["H6593:B-2"]=H6593({name:"Suburban Residential (B-2) District",section:"8B",
+  types:{single:{ref:"8B(2)–(4)",lotArea:540,lotWidth:15,front:6,side:1.5,flank:1.5,rear:7.5,height:11}},
+  notes:["Uses are those of the B-1 District. Height is limited to 2½ storeys and 11.0 m."]});
+ZONES["H6593:C"]=H6593({name:"Urban Protected Residential (C) District",section:"9",
+  types:{single:{ref:"9(2)–(4)",lotArea:360,lotWidth:12,front:6,side:1.2,flank:1.2,rear:7.5,height:11}},
+  notes:["Single family dwelling only (with up to three lodgers). Height is limited to 2½ storeys and 11.0 m (9(2))."]});
+ZONES["H6593:D"]=H6593({name:"Urban Protected Residential, One and Two Family Dwellings (D) District",section:"10",
+  types:{single:{ref:"10(3)–(4)(i)",lotArea:360,lotWidth:12,front:6,side:1.2,flank:1.2,rear:7.5,height:11},
+        duplex:{ref:"10(3)–(4)(ii)",lotArea:540,lotWidth:18,front:6,side:1.2,flank:1.2,rear:7.5,height:11}},
+  notes:["Up to 3 storeys and 14.0 m is allowed in a D District, but then each side yard must be at least 2.7 m. The 11.0 m and 1.2 m figures above are for a building up to 2½ storeys (10(2), 10(3)(ii)).",
+         "A two family dwelling needs a lot at least 18.0 m wide and 540 m² (10(4)(ii))."]});
+ZONES["H6593:R-4"]=H6593({name:"Small Lot Single Family Detached (R-4) District",section:"9A",
+  types:{single:{ref:"9A(2)",lotArea:278,lotWidth:9,front:6,side:1.2,flank:1.2,rear:7.5,height:11},
+        semi:{ref:"9A(3)",lotAreaPerUnit:270,lotWidthPerUnit:9,front:6,side:1.2,flank:1.2,rear:7.5,height:11}},
+  notes:["Single family lots: no lot may be under 9.0 m wide or 278 m², and the average of all R-4 single family lots must be at least 10.0 m wide and 306 m² (9A(2)(c)).",
+         "A single family dwelling must be at least 1.2 m from a single family dwelling on the lot next door (9A(2)(d)). A semi-detached lot must be at least 18.0 m wide and 540 m² (two units, 9A(3)(c))."]});
+ZONES["H6593:A"]=H6593({name:"Conservation, Open Space, Park and Recreation (A) District",section:"7",restricted:true,types:{}});
+
+/* ---------------- Former Town of Ancaster Zoning By-law 87-57 (consolidated October 2026): residential and agricultural zones ----------------
+   Read from the City's consolidation PDF. "Plus Schedule C" distances (road widening setbacks) are NOT added here: check Schedule C for the street. */
+const ANC=(o)=>({bylaw:"87-57",url:FORMER["87-57"].url,...o});
+const ANC_R_NOTE="Front and street-side yards are shown without the Schedule “C” distance that the by-law adds on streets listed there. Check Schedule C for this street.";
+const ANC_FIG1="Semi-detached and street townhouse dwellings are allowed only on lots identified on Figure 1 of Section 39 (Special Figures). Those lots are not detected here.";
+ZONES["ANC:R1"]=ANC({name:"Residential (R1) Zone",section:"11.1",
+  types:{single:{ref:"11.1.2",lotArea:800,lotWidth:24,front:7.5,side:2.5,flank:6.5,rear:7.5,height:10.5,coverage:35}},
+  notes:["Corner lot: minimum area 900 m² and frontage 28 m (11.1.2(a),(b)).","On an interior lot with no attached garage or carport, one side yard must be at least 5.5 m (11.1.2(e)(i)).",ANC_FIG1,ANC_R_NOTE]});
+ZONES["ANC:R2"]=ANC({name:"Residential (R2) Zone",section:"11.2",
+  types:{single:{ref:"11.2.2",lotArea:700,lotWidth:21,front:7.5,side:1.8,flank:5.8,rear:7.5,height:10.5,coverage:35}},
+  notes:["Corner lot: minimum area 800 m² and frontage 25 m.","On an interior lot with no attached garage or carport, one side yard must be at least 4.8 m.",ANC_FIG1,ANC_R_NOTE]});
+ZONES["ANC:R3"]=ANC({name:"Residential (R3) Zone",section:"11.3",
+  types:{single:{ref:"11.3.2",lotArea:600,lotWidth:18,front:7.5,side:1.5,flank:5.5,rear:7.5,height:10.5,coverage:35}},
+  notes:["Corner lot: minimum area 700 m² and frontage 22 m.","On an interior lot with no attached garage or carport, one side yard must be at least 4.5 m.",ANC_FIG1,ANC_R_NOTE]});
+ZONES["ANC:R4"]=ANC({name:"Residential (R4) Zone",section:"12",
+  types:{single:{ref:"12.2",lotArea:400,lotWidth:12,front:7.5,side:1.2,flank:5.2,rear:7.5,height:10.5,coverage:35}},
+  notes:["Corner lot: minimum area 500 m² and frontage 16 m (12.2(a),(b)).","On an interior lot with no attached garage or carport, one side yard must be at least 4.2 m (12.2(e)(i)).",ANC_FIG1,ANC_R_NOTE]});
+ZONES["ANC:R5"]=ANC({name:"Residential (R5) Zone",section:"13",
+  types:{single:{ref:"13.2",lotArea:275,lotWidth:10,front:7.0,side:1.2,flank:5.2,rear:7.0,height:10.5,coverage:40},
+        semi:{ref:"13.2",lotAreaPerUnit:247,lotWidthPerUnit:9,front:7.0,side:1.2,flank:5.2,rear:7.0,height:10.5,coverage:40}},
+  notes:["Corner lot: detached 385 m² and 14 m frontage; corner semi-detached unit 357 m² and 13 m frontage.","The front yard is 7.0 m plus any Schedule C distance, and the dwelling may not be more than 1.5 m behind the garage. The driveway may cover no more than 50% of the front yard.","Street townhouses are allowed only on lots identified on Figure 1 of Section 39. "+ANC_R_NOTE]});
+ZONES["ANC:RM1"]=ANC({name:"Residential Multiple (RM1) Zone",section:"14",
+  types:{semi:{ref:"14.2",lotAreaPerUnit:400,lotWidthPerUnit:12,front:7.5,side:3.0,flank:7.5,rear:7.5,height:10.5,coverage:35}},
+  notes:["Parcel: 800 m² and 24 m frontage (corner lot 1,000 m² and 30 m); each unit 400 m² and 12 m (corner unit 600 m² and 18 m).","Side yard is 3.0 m, or 1.5 m with an attached garage or carport with no rooms above, or 4.5 m on an interior lot with no garage or carport. Corner street side yard 7.5 m plus Schedule C.","Where RM1 adjoins ER, R1, R2 or R3 land, a 3.0 m planting strip is required. Other uses in 14.1(b) follow the RM2 street townhouse rules (15.2)."]});
+ZONES["ANC:RM2"]=ANC({name:"Residential Multiple (RM2) Zone",section:"15",
+  types:{town:{ref:"15.2",lotAreaPerUnit:280,unitWidth:9,front:7.5,side:2.5,flank:7.5,rear:7.5,height:10.5,coverage:35,landscaped:30}},
+  notes:["Street townhouses: parcel at least 1,850 m² per dwelling (block) and 280 m² per unit; frontage 50 m per block and 9 m per unit (end unit 11.5 m, or 17 m on a corner). Lot depth at least 30 m (15.2).","Not more than eight units in a row, and no more than four without a 1 m offset or varied front face. No front yard may abut the rear yard of a detached dwelling.",ANC_R_NOTE]});
+ZONES["ANC:ER"]=ANC({name:"Existing Residential (ER) Zone",section:"10",
+  types:{single:{ref:"10.3",lotArea:695,lotWidth:18,front:7.5,side:2.0,flank:6.0,rear:7.5,height:9.5}},
+  notes:["Front yard: within 20% of the average of the nearest neighbouring principal dwellings (never under 5.0 m); otherwise 7.5 m minimum and 9.0 m maximum (Table 10.3.4).","Side yard: 2.0 m for frontage up to 23 m; for wider lots 10% of frontage up to 5.0 m. One metre of each side yard must be kept clear of structures, walkways and hard surface (Table 10.3.5).","Rear yard: 25% of the lot depth (not under 7.5 m) up to 40 m deep; 30% for 40 to 45 m, 35% for 45 to 50 m, 40% beyond 50 m (Table 10.3.6). The 7.5 m shown is the floor.","Height: 7.5 m for one storey, 9.5 m for two storeys. Coverage: 35% (one storey) on lots up to 1,650 m²; 30% and 20% limits apply to other combinations (Table 10.3.3), so check it.","Schedule C does not apply in the ER zone (10.3.4). Existing lots and buildings are deemed to comply (10.3.5). A garage or carport may project up to 2.0 m ahead of the front façade but never sits in a front or flankage yard (10.3.1)."]});
+ZONES["ANC:A"]=ANC({name:"Agricultural (A) Zone",section:"8",
+  types:{single:{ref:"8.2",lotArea:1850,lotWidth:30,front:7.5,side:3.0,flank:7.5,rear:9,height:10.5}},
+  notes:["Shown for the dwelling. Agricultural buildings need 15 m yards. Maximum lot coverage is 400 m² up to 4 ha, 1,000 m² from 4 to 10 ha, and 1% over 10 ha (8.2(c)). Dwelling floor area at least 100 m².","Yards carry any Schedule C distance. Accessory buildings to a dwelling may not be in a front yard, are at least 2 m from side and rear lines (7.5 m on the street side of a corner) and up to 4.5 m high."]});
+
+/* ---------------- Former Town of Dundas Zoning By-law 3581-86 (consolidated October 2026): R1 to R4 ---------------- */
+const DUN=(o)=>({bylaw:"3581-86",url:FORMER["3581-86"].url,...o});
+const DUN_SIDE="Side yard 1.2 m (R1 single detached 1.5 m), except: 3.5 m on the flankage street side of a corner lot; 3.0 m where the side yard gives access to a parking area or rear yard garage; 6.0 m for an attached garage or carport facing the flankage street; and 5.0 m on one side of an interior lot with no garage or carport.";
+const dunT=(ref,o)=>({ref,front:6,rear:7.5,height:10.5,flank:3.5,...o});
+const dunTown={ref:"12.4",lotAreaPerUnit:180,unitWidth:6,front:6,side:7.5,flank:7.5,rear:7.5,height:10.5};
+const DUN_TOWN="Street townhouse (12.4): 180 m² and 6.0 m per unit; side yard 7.5 m, or 3.0 m where no habitable room window faces it and it does not abut a public street.";
+ZONES["DUN:R1"]=DUN({name:"Single-Detached Residential (R1) Zone",section:"8",
+  types:{single:dunT("8.2",{lotArea:540,lotWidth:18,side:1.5}),
+         semi:dunT("10.3 via 8.8",{lotAreaPerUnit:315,lotWidthPerUnit:10.5,side:1.2}),
+         duplex:dunT("10.4 via 8.9",{lotArea:540,lotWidth:18,side:1.2}),
+         town:dunTown},
+  notes:[DUN_SIDE,"Semi-detached (a 630 m² and 21.0 m lot, two units) and duplex dwellings follow Sections 10.3 and 10.4 as Section 8 directs. "+DUN_TOWN]});
+ZONES["DUN:R2"]=DUN({name:"Single-Detached Residential (R2) Zone",section:"9",
+  types:{single:dunT("9.2",{lotArea:450,lotWidth:15,side:1.2}),
+         semi:dunT("10.3 via 9.1.8",{lotAreaPerUnit:315,lotWidthPerUnit:10.5,side:1.2}),
+         duplex:dunT("9.2",{lotArea:450,lotWidth:15,side:1.2}),
+         town:dunTown},
+  notes:[DUN_SIDE,"Single-detached and duplex dwellings share one set of rules in R2 (450 m², 15.0 m). Semi-detached follows Section 10.3 (630 m² and 21.0 m for the pair). "+DUN_TOWN]});
+ZONES["DUN:R3"]=DUN({name:"Low Density Residential (R3) Zone",section:"10",
+  types:{single:dunT("10.2",{lotArea:450,lotWidth:15,side:1.2}),
+         semi:dunT("10.3",{lotAreaPerUnit:315,lotWidthPerUnit:10.5,side:1.2}),
+         duplex:dunT("10.4",{lotArea:540,lotWidth:18,side:1.2}),
+         town:dunTown},
+  notes:[DUN_SIDE,"Semi-detached lot (pair): 630 m² and 21.0 m. "+DUN_TOWN]});
+ZONES["DUN:R4"]=DUN({name:"Low Density Residential (R4) Zone",section:"11",
+  types:{single:dunT("11.2",{lotArea:450,lotWidth:15,side:1.2}),
+         semi:dunT("11.3",{lotAreaPerUnit:315,lotWidthPerUnit:10.5,side:1.2}),
+         duplex:dunT("11.4",{lotArea:540,lotWidth:18,side:1.2}),
+         town:dunTown},
+  notes:[DUN_SIDE,"Semi-detached lot (pair): 630 m² and 21.0 m. "+DUN_TOWN+" Rooming, boarding and lodging houses, group homes and retirement homes also use 450 m² and 15.0 m."]});
+
+/* ---------------- Former City of Stoney Creek Zoning By-law 3692-92 (consolidated October 2026): R1 to R6 and RM2 ---------------- */
+const SCK=(o)=>({bylaw:"3692-92",url:FORMER["3692-92"].url,...o});
+const scT=(ref,o)=>({ref,front:6,side:1.25,flank:3.0,rear:7.5,height:11,coverage:40,...o});
+const SC_SIDE="Side yard 1.25 m, except: an attached garage or carport may be 1.0 m from a side lot line that is not a street; on an interior lot with no attached garage or carport, one side yard must be 3.0 m; on a corner lot the flankage side yard is 3.0 m, and an attached garage or carport facing the flankage street must be at least 5.5 m from it.";
+const SC_FIG1="Semi-detached, duplex and street townhouse dwellings are allowed in this zone only on lots identified on Figure 1 of Part 15 (Special Figures). Those lots are not detected here.";
+ZONES["SC:R1"]=SCK({name:"Single Residential (R1) Zone",section:"6.2",
+  types:{single:scT("6.2.3",{lotArea:600,lotWidth:18})},
+  notes:["Corner lot: 650 m² and 19.5 m frontage (6.2.3(a),(b)).",SC_SIDE,SC_FIG1]});
+ZONES["SC:R2"]=SCK({name:"Single Residential (R2) Zone",section:"6.3",
+  types:{single:scT("6.3.3",{lotArea:460,lotWidth:15})},
+  notes:["Corner lot: 505 m² and 16.5 m frontage (6.3.3).",SC_SIDE,SC_FIG1]});
+ZONES["SC:R3"]=SCK({name:"Single Residential (R3) Zone",section:"6.4",
+  types:{single:scT("6.4.3",{lotArea:370,lotWidth:12})},
+  notes:["Corner lot: 425 m² and 13.75 m frontage (6.4.3).",SC_SIDE,SC_FIG1]});
+ZONES["SC:R4"]=SCK({name:"Single Residential (R4) Zone",section:"6.5",
+  types:{single:scT("6.5.3",{lotArea:310,lotWidth:10})},
+  notes:["Corner lot: 400 m² and 13 m frontage (6.5.3).",SC_SIDE,SC_FIG1]});
+ZONES["SC:R5"]=SCK({name:"Residential (R5) Zone",section:"6.6",
+  types:{semi:scT("6.6.3",{lotAreaPerUnit:300,lotWidthPerUnit:9})},
+  notes:["Semi-detached dwelling. Divided lot (one unit): 300 m² and 9 m, corner 350 m² and 10.5 m. Undivided lot (both units): 600 m² and 18 m, corner 650 m² and 19.5 m. No side yard is needed along the common wall (6.6.3).",SC_SIDE.replace("1.25 m, except:","1.25 m (none at the common wall), except:"),"Duplex and street townhouse dwellings are allowed only on Figure 1 lots."]});
+ZONES["SC:R6"]=SCK({name:"Residential (R6) Zone",section:"6.7",
+  types:{single:scT("6.7.3(a)",{lotArea:310,lotWidth:10}),
+         semi:scT("6.7.3(b)",{lotAreaPerUnit:300,lotWidthPerUnit:9}),
+         duplex:scT("6.7.3(c)",{lotArea:460,lotWidth:15})},
+  notes:["Single detached corner lot: 400 m² and 13 m. Semi-detached divided lot (one unit) 300 m² and 9 m, corner 350 m² and 10.5 m; undivided lot (both units) 600 m² and 18 m, corner 650 m² and 19.5 m. Duplex corner lot: 505 m² and 16.5 m.",SC_SIDE,"Street townhouses are allowed only on Figure 1 lots (6.7.2(f)), under the RM2 rules."]});
+ZONES["SC:RM2"]=SCK({name:"Multiple Residential (RM2) Zone, street townhouses",section:"6.9",
+  types:{town:{ref:"6.9.3",lotAreaPerUnit:180,unitWidth:6,front:6,side:2.0,flank:3.0,rear:7.5,height:11,coverage:50,landscaped:30}},
+  notes:["Interior unit 180 m² and 6 m; end unit 240 m² and 8 m; corner unit 270 m² and 9 m. End unit side yard 2.0 m, corner unit 3.0 m (6.9.3).","At least 36 m² of privacy area per unit. No more than 8 townhouse units in a building."]});
+
+/* ---------------- Former Township of Glanbrook Zoning By-law 464 (consolidated October 2026): ER and R1 to R4 ---------------- */
+const GLB=(o)=>({bylaw:"464",url:FORMER["464"].url,...o});
+const GL_FIG1="Semi-detached, duplex and street townhouse dwellings are allowed in this zone only on lots identified on Figure 1 of Section 50 (Special Figures), under the RM1 and RM2 rules (17.4, 17.5, 18.2). Those lots are not detected here.";
+const GL_NOTE="The by-law also sets a minimum floor area per dwelling by storeys.";
+ZONES["GL:ER"]=GLB({name:"Existing Residential (ER) Zone",section:"12",
+  types:{single:{ref:"12.2",lotArea:1390,lotWidth:22.5,front:9,side:1.8,flank:6,rear:10.7,height:10.7,coverage:25}},
+  notes:["Minimum lot depth 30 m. On an interior lot with no attached garage or carport, one side yard must be 5.4 m (12.2(f)(i)).","Floor area per dwelling: 100 m² (1 storey), 120 m² (1½ storey or split), 145 m² (2 or 2½ storeys).",GL_FIG1]});
+ZONES["GL:R1"]=GLB({name:"Residential (R1) Zone",section:"13",
+  types:{single:{ref:"13.2",lotArea:700,lotWidth:22,front:9,side:3,flank:6,rear:10.7,height:10.7,coverage:30}},
+  notes:["Shown for lots on municipal water and sanitary sewers. With only one of them the lot needs 50 m frontage and 4,000 m²; with neither, 60 m and 5,000 m² (13.2(a),(b)).","On an interior lot with no attached garage or carport, one side yard must be 6.0 m (13.2(e)(i)).","Floor area per dwelling: 140 m² (1 storey), 175 m² (1½ storey or split), 190 m² (2 or 2½ storeys).",GL_FIG1]});
+ZONES["GL:R2"]=GLB({name:"Residential (R2) Zone",section:"14",
+  types:{single:{ref:"14.2",lotArea:550,lotWidth:18,front:7.5,side:1.5,flank:5.0,rear:9,height:10.7,coverage:30}},
+  notes:["On an interior lot with no attached garage or carport, one side yard must be 4.5 m (14.2(e)(i)).","Floor area per dwelling: 110 m² (1 storey), 130 m² (1½ storey or split), 150 m² (2 or 2½ storeys).",GL_FIG1]});
+ZONES["GL:R3"]=GLB({name:"Residential (R3) Zone",section:"15",
+  types:{single:{ref:"15.2",lotArea:450,lotWidth:15,front:7.5,side:1.2,flank:5.0,rear:7.5,height:10.7,coverage:35}},
+  notes:["Corner lot: 550 m² and 18 m frontage (15.2(a),(b)).","Side yard is 3.0 m where it gives access to a parking area or rear yard garage. On an interior lot with no attached garage or carport, one side yard must be 4.5 m. An attached garage or carport facing the flankage street must be at least 6.0 m from it (15.2(e)).","Floor area per dwelling: 100 m² (1 storey), 120 m² (1½ storey or split), 135 m² (2 or 2½ storeys).",GL_FIG1]});
+ZONES["GL:R4"]=GLB({name:"Residential (R4) Zone",section:"16",
+  types:{single:{ref:"16.2",lotArea:400,lotWidth:12,front:7.5,side:1.2,flank:4.5,rear:7.5,height:10.7,coverage:35}},
+  notes:["Corner lot: 500 m² and 16 m frontage (16.2(a),(b)).","On an interior lot with no attached garage or carport, one side yard must be 4.2 m. An attached garage or carport facing the flankage street must be at least 6.0 m from it (16.2(e)).","Floor area per dwelling: 100 m² (1 storey), 110 m² (1½ storey or split), 125 m² (2 or 2½ storeys).",GL_FIG1]});
+
+/* ---------------- Former Town of Flamborough Zoning By-law 90-145-Z (consolidated October 2026): R1 to R6 ---------------- */
+const FLB=(o)=>({bylaw:"90-145-Z",url:FORMER["90-145-Z"].url,...o});
+const FL_FIG1="Semi-detached, duplex and street townhouse dwellings are allowed in this zone only on lots identified on Figure 1 of Section 35 (Special Figures). Those lots are not detected here.";
+ZONES["FL:R1"]=FLB({name:"Urban Residential (Single Detached) (R1) Zone",section:"6",
+  types:{single:{ref:"6.2",lotArea:665,lotWidth:18,front:7.5,side:1.2,flank:7.5,rear:7.5,height:11,coverage:25}},
+  notes:[FL_FIG1,"No minimum landscaped open space."]});
+ZONES["FL:R2"]=FLB({name:"Settlement Residential (R2) Zone",section:"7",
+  types:{single:{ref:"7.2",lotArea:2000,lotWidth:30,front:7.5,side:1.8,flank:7.5,rear:10,height:11,coverage:20}},
+  notes:["Single detached dwelling only."]});
+ZONES["FL:R3"]=FLB({name:"Estate Residential (R3) Zone",section:"8",
+  types:{single:{ref:"8.2",lotArea:6000,lotWidth:36,front:7.5,side:3,flank:7.5,rear:10,height:11,coverage:10}},
+  notes:["Single detached dwelling only."]});
+ZONES["FL:R4"]=FLB({name:"Urban Residential (Semi-Detached and Link) (R4) Zone",section:"9",
+  types:{semi:{ref:"9.2",lotAreaPerUnit:205,lotWidthPerUnit:6.7,front:7.5,side:1.2,flank:4.2,rear:7.5,height:11,coverage:40}},
+  notes:["Link dwelling: 315 m² and 9.5 m per unit; side yard 0.3 m on the common side (9.2). Semi-detached: no side yard on the common side, 1.2 m on the other side.","Duplex and street townhouse dwellings are allowed only on Figure 1 lots (Section 35), under the R5 and R6 rules."]});
+ZONES["FL:R5"]=FLB({name:"Core Area Residential (R5) Zone",section:"10",
+  types:{single:{ref:"10.2",lotArea:510,lotWidth:15,front:5.0,side:1.8,flank:4.0,rear:7.5,height:8.5,coverage:25},
+         semi:{ref:"10.2",lotAreaPerUnit:330,lotWidthPerUnit:9,front:5.0,side:1.8,flank:4.0,rear:7.5,height:8.5,coverage:25},
+         duplex:{ref:"10.2",lotArea:510,lotWidth:15,front:5.0,side:1.8,flank:4.0,rear:7.5,height:8.5,coverage:25},
+         triplex:{ref:"10.2",lotArea:710,lotWidth:21,front:5.0,side:1.8,flank:4.0,rear:7.5,height:8.5,coverage:25}},
+  notes:["Shown for a dwelling of two or more storeys: height up to 8.5 m, coverage 25%, interior side yard 1.8 m. A dwelling under two storeys and no higher than 6.5 m may cover 35% of the lot and uses a 1.2 m side yard (10.2(c),(d),(g)).","Front yard: within 20% of the average front yard of the nearest neighbouring principal dwellings (never under 5.0 m); otherwise 5.0 to 10.0 m (10.2(e)). The 5.0 m shown is the floor.","Exterior side yard: within 20% of the nearest dwelling’s setback facing the same street, and never more than 7.5 m (10.2(h)). The 4.0 m shown is an approximate floor (80% of the 5.0 m minimum front yard). Check the neighbour.","Street townhouses on Figure 1 lots follow R6 Section 11.2(ii). Section 10 was partly amended by By-law 22-072; the City’s note says some of those changes are not in this consolidation."]});
+ZONES["FL:R6"]=FLB({name:"Medium Density Residential (R6) Zone, street townhouses",section:"11",
+  types:{town:{ref:"11.2(ii)",lotAreaPerUnit:210,unitWidth:6.5,front:7.5,side:3.0,flank:7.5,rear:7.5,height:11,coverage:40,landscaped:30}},
+  notes:["Street townhouse: 210 m² and 6.5 m per unit, 3.0 m interior side yard except on the common side, 30% landscaped open space.","Block townhouse (280 m² per unit, 30 m frontage, 40 units per net hectare), apartment and quadruplex uses have separate rules in Section 11.2 and are not modelled."]});
 const DTYPES = {
   single:{label:"Single detached dwelling", rules:"single", units:1},
   duplex:{label:"Duplex dwelling", rules:"single", units:2},
@@ -371,6 +603,19 @@ const DTYPES = {
   custom:{label:"Building (enter regulations)", rules:"custom", units:1}
 };
 const ASSUMED = {ref:"assumed", front:6, side:1.2, flank:3, rear:7.5, height:10.5};
+
+/* ---------------- NEC exemption setbacks ----------------
+   In the Niagara Escarpment Area of Development Control, a Development Permit governs. Work is exempt from the permit
+   (R.R.O. 1990, Reg. 828) only if it stays outside these distances, so these replace the zoning setbacks on those lots.
+   Source: Niagara Escarpment Commission exemption criteria pages (escarpment.org). Reg. 828 was amended in 2026; confirm against the in-force text. */
+const NEC_EX={
+  addition:{label:"Addition to a single dwelling",short:"additions",front:15,side:4.5,flank:15,rear:7.5,height:7.5,
+    note:"Additions: combined ground footprint of all additions no more than 93 m²; no taller than 7.5 m (and no taller than the original dwelling); any lot line that abuts a road counts as a front yard (15 m). If the dwelling is already closer than these distances, the addition is exempt only if it is no closer to the lot line than the original dwelling and the addition alone meets the minimums."},
+  deck:{label:"Deck, porch, patio or veranda",short:"decks and porches",front:10,side:1,flank:10,rear:7.5,height:7.5,
+    note:"Decks, porches, patios and verandas: combined footprint of all of them no more than 56 m²; any lot line that abuts a road counts as a front yard (10 m); at least 10 m from the Escarpment brow where the lot has a rock cliff brow (not drawn here)."},
+  accessory:{label:"Accessory building or structure",short:"accessory buildings",front:15,side:1,flank:15,rear:1,height:4.5,
+    note:"Accessory buildings: 15 m front yard applies only if the structure sits between the front lot line and the nearest dwelling wall (it is drawn here as a full-lot limit, so it is conservative); at least 1 m from side and rear lot lines; combined area of all accessory structures no more than 5% of the lot or 72 m², whichever is less; no taller than 4.5 m. A single dwelling must already exist."}
+};
 
 /* ---------------- Network: fetch with JSONP fallback (ArcGIS REST supports callback=) ---------------- */
 let cbn = 0;
@@ -385,10 +630,14 @@ function jsonp(url, params){
     s.src=url+"?"+qs({...params,f:"json",callback:name}); document.head.appendChild(s);
   });
 }
+function fetchT(url,opts,ms){ // fetch that gives up instead of hanging
+  const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms||20000);
+  return fetch(url,{...(opts||{}),signal:ac.signal}).finally(()=>clearTimeout(t));
+}
 async function arc(url, params){
   let data;
-  try{ const r=await fetch(url+"?"+qs({...params,f:"json"})); data=await r.json(); }
-  catch(e){ data=await jsonp(url,params); }
+  try{ const r=await fetchT(url+"?"+qs({...params,f:"json"})); data=await r.json(); }
+  catch(e){ if(e&&e.name==="AbortError")throw new Error("The City map server did not respond. Try again in a moment."); data=await jsonp(url,params); }
   if(data && data.error) throw new Error(data.error.message||"Map server error");
   return data;
 }
@@ -523,15 +772,17 @@ async function lookupPoint(lon,lat,label,fromSearch){
     const envQ={geometry:env,geometryType:"esriGeometryEnvelope",inSR:4326,spatialRel:"esriSpatialRelIntersects",outSR:4326,returnGeometry:true};
     const insidePt=pointInside(outer);
     const zpt={...common,geometry:{x:insidePt[0],y:insidePt[1],spatialReference:{wkid:4326}},outFields:"*",returnGeometry:false};
-    const [zq,caq,sq,cq,bq,ctq,rq,pq5]=await Promise.all([
+    const [zq,caq,sq,cq,bq,ctq,rq,pq5,prq,rpq]=await Promise.all([
       arc(SVC.zoning+"/query",zpt),
       arc(SVC.zoningCA+"/query",zpt).catch(()=>({features:[]})),
       arc(SVC.streets+"/query",{...envQ,outFields:"*"}).catch(()=>({features:[]})),
       arc(SVC.parcels+"/query",{...envQ,outFields:"OBJECTID,PRIME_SUB",where:"PRIME_SUB='0000'",resultRecordCount:120}).catch(()=>({features:[]})),
       arc(SVC.buildings+"/query",{...envQ,outFields:"*"}).catch(()=>({features:[]})),
       arc(SVC.contours+"/query",{...envQ,outFields:"HEIGHT_IN_METRES"}).catch(()=>({features:[]})),
-      arc(SVC.railways+"/query",{...envQ,outFields:"*"}).catch(()=>({features:[],failed:true})),
-      arc(SVC.zoning+"/query",{...envQ,outFields:"ZONING_CODE",where:"ZONING_CODE LIKE 'P5%' OR ZONING_CODE LIKE 'P7%' OR ZONING_CODE LIKE 'P8%'"}).catch(()=>({features:[],failed:true}))
+      arc(SVC.railways+"/query",{...envQ,geometry:{xmin:Math.min(...xs)-0.0048,ymin:Math.min(...ys)-0.0034,xmax:Math.max(...xs)+0.0048,ymax:Math.max(...ys)+0.0034,spatialReference:{wkid:4326}},outFields:"*"}).catch(()=>({features:[],failed:true})),
+      arc(SVC.zoning+"/query",{...envQ,outFields:"ZONING_CODE",where:"ZONING_CODE LIKE 'P5%' OR ZONING_CODE LIKE 'P7%' OR ZONING_CODE LIKE 'P8%'"}).catch(()=>({features:[],failed:true})),
+      arc(SVC.pra+"/query",zpt).catch(()=>({features:[],failed:true})),
+      arc(SVC.regplan+"/query",zpt).catch(()=>({features:[],failed:true}))
     ]);
     if(myId!==S.lookupId)return;
     S.example=false; S.law=null; S.origin=o; S.ring=ring; S.edges=buildEdges(ring); S.parcelAttrs=feat.attributes; S.address=label||feat.attributes.LOCATION;
@@ -544,6 +795,11 @@ async function lookupPoint(lon,lat,label,fromSearch){
     S.zone.key=zoneKey(S.zone.code,za);
     if(!S.zone.key&&ca){const k=zoneKey(ca.ZONING_CODE,{PARENT_BY_LAW_NUMBER:"05-200"});if(k){S.zone.key=k;S.zone.fromCA=true}}
     S.edited={};
+    // legal description from the City's own layers (free). Plan lot and older plan numbers are not in City GIS: entered by hand from ONLAND.
+    {const rp=(rpq.features&&rpq.features[0])?rpq.features[0].attributes:null;
+     S.legal={plan62M:rp?rp.PLAN_62M:"",planName:rp?rp.MPLAN_NAME:"",failed:!!rpq.failed};
+     S.manual={lot:"",con:"",planLot:"",regPlan:S.legal.plan62M||""};
+     S.pra={name:(prq.features&&prq.features[0])?String(prq.features[0].attributes.PARKING_RATE||""):"",failed:!!prq.failed};}
     // existing buildings: City footprints that sit mostly on this lot, trimmed to the lot lines
     S.buildings=(bq.features||[]).map(f=>{
       const r=f.geometry&&f.geometry.rings;if(!r)return null;
@@ -578,6 +834,12 @@ function zoneKey(code,attrs){
   const m=String(code).trim().match(/^([A-Za-z]+\d*[a-z]?)/);if(!m)return null;
   const k=m[1].toUpperCase();
   const parent=attrs&&attrs.PARENT_BY_LAW_NUMBER?String(attrs.PARENT_BY_LAW_NUMBER):"05-200";
+  if(/^6593/.test(parent)){const b=String(code).split("/")[0].trim().toUpperCase().replace(/\s+/g,"");const kk="H6593:"+b;return ZONES[kk]?kk:null}
+  if(/^87-57/.test(parent)){const b=String(code).split(/[-\/\s]/)[0].trim().toUpperCase();const kk="ANC:"+b;return ZONES[kk]?kk:null}
+  if(/^90-145/.test(parent)){const mm=String(code).trim().toUpperCase().match(/^(R[1-6])(?![0-9])/);const kk=mm?"FL:"+mm[1]:"";return ZONES[kk]?kk:null}
+  if(/^464(\s|$)/.test(parent)){const mm=String(code).trim().toUpperCase().match(/^(ER|R[1-4])(?![0-9])/);const kk=mm?"GL:"+mm[1]:"";return ZONES[kk]?kk:null}
+  if(/^3692-92/.test(parent)){const mm=String(code).trim().toUpperCase().match(/^(RM2|R[1-6])(?![0-9])/);const kk=mm?"SC:"+mm[1]:"";return ZONES[kk]?kk:null}
+  if(/^3581-86/.test(parent)){const mm=String(code).trim().toUpperCase().match(/^(R[1-4])(?![0-9])/);const kk=mm?"DUN:"+mm[1]:"";return ZONES[kk]?kk:null}
   if(!/05-200/.test(parent))return null;
   return ZONES[k]?k:null;
 }
@@ -606,17 +868,40 @@ function classifyEdges(){
   S.frontEdge=front;
 }
 
+
+/* ---------------- City of Hamilton interpretation policies (ZON series), read from the City's PDFs ---------------- */
+function cityPolicies(r){
+  const key=(S.zone&&S.zone.key)||"";if(!r||!r.X||!key)return;
+  const z=zoneDef();if(!z||z.restricted)return;
+  const dw=["single","duplex","triplex","semi","town","fourplex"].includes(S.dtype);
+  if(dw)r.X.push({ref:"Policy ZON-041",t:"Additions to a dwelling that is legal non-complying in location",v:"City policy (all by-laws, revised 29 Jan 2024): an addition to a single, duplex, semi-detached, two family or street townhouse dwelling, or to an accessory building converted to a detached secondary unit (within 10% of its floor area), does not need a minor variance for yard setbacks if the existing legally established setbacks are kept or improved, for example an addition straight above the house or in line with its walls. The addition must still meet height, lot coverage, landscaped area and parking rules, and projections follow the by-law’s encroachment rules."});
+  r.X.push({ref:"Policy ZON-042",t:"Reconstruction of existing buildings",v:"City policy (all by-laws, revised 29 May 2025): demolishing a building down to its foundation is not treated as a reconstruction. If the existing foundation is kept, the existing yards, lot coverage and parking are deemed to comply and need no minor variance. Anything built beyond the existing foundation or footprint must meet the zoning by-law."});
+  if(/^H6593:/.test(key)){
+    r.X.push({ref:"Policy ZON-021",t:"“Storey, Half” in a single family dwelling (By-law 6593)",v:"City policy (issued 2016; its review date of 2019 has passed, so confirm it is current): besides the height tests in the by-law’s definition, a half storey must sit completely within a sloping roof, so the roof and floor meet along at least two full continuous lengths of the building. No more than two dormers, each up to 1.2 m wide, may be on each side of the sloping roof. Floor area that does not meet this counts as a full storey."});
+    r.X.push({ref:"Policy ZON-008, 18A(24)(a)",t:"Garage opening width for a parking space (By-law 6593)",v:"City policy (revised 22 Feb 2017; review date of 2020 has passed, so confirm it is current): a parking space inside a private garage may have an opening as narrow as 2.4 m. The 2.8 m driveway width in 18A(24)(a) applies to spaces at grade only. This replaced the earlier 2.7 m figure."});
+  }
+}
 /* ---------------- Regulations ---------------- */
+function excOf(){const c=String((S.zone&&S.zone.code)||"").trim();const p=String((S.zone&&S.zone.attrs&&S.zone.attrs.PARENT_BY_LAW_NUMBER)||"");
+  if(/^87-57/.test(p)){const m=c.match(/^[A-Za-z]+\d*[A-Za-z]?[-\/\s](.+)$/);return m?m[1]:""}
+  if(/^90-145/.test(p)){const m=c.match(/^R[1-6][-\/\s]*(.+)$/i);return m?m[1]:""}
+  if(/^464(\s|$)/.test(p)){const m=c.match(/^(?:ER|R[1-4])[-\/\s]*(.+)$/i);return m?m[1]:""}
+  if(/^3692-92/.test(p)){const m=c.match(/^(?:RM2|R[1-6])[-\/\s]*(.+)$/i);return m?m[1]:""}
+  if(/^3581-86/.test(p)){const m=c.match(/^R[1-4][-\/\s]*(.+)$/i);return m?m[1]:""}
+  return c.includes("/")?c.split("/").slice(1).join("/"):""}
 function zoneDef(){return S.zone.key?ZONES[S.zone.key]:null}
+function a0(){return S.parcelAttrs||{}}
+function typeRules(z,k){if(!z||!z.types)return null;if(z.bylaw)return z.types[k]||null; /* former by-laws: only dwelling types they name */ return z.types[k]||z.types[DTYPES[k].rules]||null}
 function permittedTypes(){
   const z=zoneDef();
   if(!z||z.restricted)return ["custom"];
-  return Object.keys(DTYPES).filter(k=>DTYPES[k].rules==="custom"||z.types[DTYPES[k].rules]);
+  return Object.keys(DTYPES).filter(k=>DTYPES[k].rules==="custom"||typeRules(z,k));
 }
 function applyZoneDefaults(){
+  S.zoneBase=null;S.necApplied=null;
   const types=permittedTypes();
   if(!types.includes(S.dtype))S.dtype=types[0];
-  const z=zoneDef(); const r=(z&&!z.restricted&&z.types[DTYPES[S.dtype].rules])||ASSUMED;
+  const z=zoneDef(); const r=(z&&!z.restricted&&typeRules(z,S.dtype))||ASSUMED;
   const keep=S.edited;
   S.regs={ref:r.ref,front:r.front,side:r.side,flank:r.flank,rear:r.rear,height:r.height,
     coverage:r.coverage??null,landscaped:r.landscaped??null,sideAgg:r.sideAgg??null,
@@ -626,7 +911,29 @@ function applyZoneDefaults(){
 }
 
 /* ---------------- Envelope + massing ---------------- */
+/* True once the law review has finished and the lot is in the NEC Area of Development Control. */
+function necDCActive(){const r=S.law&&S.law.state==="done"?S.law.res:null;return !!(r&&r.necDC&&!r.necDC.error&&r.necDC.feats&&r.necDC.feats.length)}
+function necExDef(){return (!S.example&&necDCActive())?NEC_EX[S.necMode||"addition"]:null}
+/* On NEC development-control lots the Rules use the permit-exemption setbacks in place of the zoning setbacks.
+   The zoning values are kept so they come back if the lot is not in the area. */
+function syncNec(){
+  const def=necExDef(),key=def?(S.necMode||"addition"):null;
+  if(S.necApplied===key)return;
+  const R=S.regs,K=["front","side","flank","rear","height","coverage","landscaped","sideAgg"];
+  if(def){
+    if(!S.zoneBase){S.zoneBase={};K.forEach(k=>S.zoneBase[k]=R[k]);S.zoneBase.ref=R.ref}
+    const v={front:def.front,side:def.side,flank:def.flank,rear:def.rear,height:def.height||S.zoneBase.height,coverage:null,landscaped:null,sideAgg:null};
+    K.forEach(k=>{R[k]=(k in S.edited)?S.edited[k]:v[k]});
+    R.ref="NEC exemption";
+  }else if(S.zoneBase){
+    K.forEach(k=>{R[k]=(k in S.edited)?S.edited[k]:S.zoneBase[k]});
+    R.ref=S.zoneBase.ref;S.zoneBase=null;
+  }
+  S.necApplied=key;
+}
+function renderNecTag(){const on=!!necExDef(),d=necExDef();["necTag3d","necTagPlan"].forEach(id=>{const el=$(id);if(el){el.hidden=!on;if(d)el.textContent="Showing NEC permit-exemption setbacks for "+d.short+" · not zoning"}})}
 function compute(){
+  syncNec();
   const R=S.regs; const lot=[toPath(S.ring)];
   const lotArea=Math.abs(area(S.ring));
   const sides=S.edges.filter(e=>e.type==="side");
@@ -708,7 +1015,7 @@ async function overlayQuery(key){
   const o=OVERLAYS[key];
   const params={geometry:S.lotLL.poly,geometryType:"esriGeometryPolygon",inSR:4326,spatialRel:"esriSpatialRelIntersects",outFields:o.out,returnGeometry:false,f:"json"};
   let d;
-  try{ const r=await fetch(o.url+"/query",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:qs(params)}); d=await r.json(); }
+  try{ const r=await fetchT(o.url+"/query",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:qs(params)},20000); d=await r.json(); }
   catch(e){ // browsers that block the cross-site POST: fall back to a point test inside the lot
     d=await jsonp(o.url+"/query",{geometry:{x:S.lotLL.pt[0],y:S.lotLL.pt[1],spatialReference:{wkid:4326}},geometryType:"esriGeometryPoint",inSR:4326,spatialRel:"esriSpatialRelIntersects",outFields:o.out,returnGeometry:false});
     if(d)d.pointOnly=true;
@@ -727,7 +1034,7 @@ async function runLawReview(){
   const keys=Object.keys(OVERLAYS);
   const results=await Promise.all(keys.map(k=>overlayQuery(k).then(r=>[k,r]).catch(e=>[k,{error:e.message}])));
   if(token!==S.lookupId)return; // a newer lookup started
-  S.law={state:"done",res:Object.fromEntries(results)};renderLaw();
+  S.law={state:"done",res:Object.fromEntries(results)};renderLaw();try{renderAll(false)}catch(e){console.error(e)} // apply NEC exemption setbacks once the review knows
 }
 function lawItems(){
   const z=zoneDef(),za=S.zone.attrs||{},R=S.law&&S.law.res||{};
@@ -774,6 +1081,18 @@ function lawItems(){
   if(hit("ipz")||hit("whpa"))items.push({s:"flag",t:"Source water protection area",d:`The lot is in a ${hit("whpa")?"wellhead protection area":"intake protection zone"} under the ${L(LAW_LINKS.cwa,"Clean Water Act, 2006")}. Some activities, such as fuel or chemical storage and septic systems, may be restricted.`});
   // 9. Airport noise
   if(hit("noise")){const f=R.noise.feats[0];items.push({s:"applies",t:"Airport noise area",d:`Inside the 2010 airport noise contours${f.MIN_DECIBEL!=null?` (${f.MIN_DECIBEL}–${f.MAX_DECIBEL} NEF)`:""}. Noise studies or warning clauses may be needed for new homes.`})}
+  // 9b. Railway proximity
+  if(S.rail===null)items.push({s:"check",t:"Railway proximity",d:"The City railway layer did not answer. Check the lot against the City map and the railway company before relying on this."});
+  else if(S.rail&&S.ring){
+    const dR=S.rail.length?ringsToLines([S.ring],S.rail):Infinity;
+    const guide=`The Federation of Canadian Municipalities and Railway Association of Canada ${L("https://www.proximityissues.ca/","proximity guidelines")} are not law, but railways and the City apply them: a ${M(30,0)} setback with a safety berm for new housing next to a main line, a noise study within ${M(300,0)}, and a vibration study within ${M(75,0)}.`;
+    const bylaw=(()=>{const b=z&&z.bylaw;if(!b)return"Zoning By-law 05-200, subsection 4.23 b), asks residential buildings to stay at least "+M(30)+" from a railway right-of-way.";
+      if(b==="464")return "Glanbrook By-law 464, subsection 7.24, sets special setbacks from railway rights-of-way. Read it.";
+      if(b==="87-57")return "Ancaster By-law 87-57, subsection 7.13(b), bars buildings within "+M(45,0)+" of the point where a street crosses a railway at grade.";
+      return "Check this by-law’s general provisions for railway setbacks.";})();
+    if(!isFinite(dR))items.push({s:"clear",t:"Railway proximity",d:`No railway line within about ${M(300,0)} of the lot on the City’s map.`});
+    else items.push({s:dR<=30?"flag":dR<=300?"applies":"clear",t:`Railway proximity · ${M(dR,0)} to the nearest track`,d:`The nearest track centreline is about ${M(dR,0)} from the lot line. The right-of-way edge is closer than the track centreline. ${bylaw} ${dR<=300?guide+" Ask the railway whether a study or berm applies.":"This is beyond the guideline study distances."}`});
+  }
   // 10. Planning Act extras for residential zones
   if(z&&/^R/.test(S.zone.key))items.push({s:"applies",t:"Additional residential units",d:`Under the ${L(LAW_LINKS.planning,"Planning Act")}, up to three residential units are permitted on a lot with a single, semi-detached or townhouse dwelling in a serviced urban area, subject to the zoning by-law's other rules.`});
   const NAMES={greenbelt:"Greenbelt",secPlan:"secondary plans",noise:"airport noise",ehn:"historical neighbourhoods",icbl:"interim control by-laws",ipz:"intake protection zones",whpa:"wellhead protection areas",coa:"Committee of Adjustment files",necMUC:"NEC minor urban centres",necPark:"NEC parks"};
@@ -783,6 +1102,7 @@ function lawItems(){
   return items;
 }
 function renderLaw(){
+  renderNecTag();
   const ul=$("law"),ban=$("lawBanner");
   if(S.example){ul.innerHTML=`<li><span class="pill info law">INFO</span><span class="lt">Search an address</span><span class="ld">The review checks the real lot against the Niagara Escarpment Commission map and the City's heritage, conservation and policy layers.</span></li>`;ban.hidden=true;return}
   if(!S.law||S.law.state==="busy"){ul.innerHTML=`<li><span class="pill info law">…</span><span class="lt">Checking provincial and City layers</span><span class="ld">Niagara Escarpment, conservation authority, heritage, Greenbelt, interim control, secondary plans, source water and airport noise.</span></li>`;ban.hidden=true;return}
@@ -791,7 +1111,7 @@ function renderLaw(){
   ul.innerHTML=items.map(i=>`<li><span class="pill ${P[i.s][0]} law">${P[i.s][1]}</span><span class="lt">${i.t}</span><span class="ld">${i.d}</span></li>`).join("");
   const R=S.law.res;const dc=R.necDC&&!R.necDC.error&&R.necDC.feats.length;
   ban.hidden=!dc;
-  if(dc)ban.innerHTML=`<b>Niagara Escarpment development control.</b> The zoning envelope below is only part of the picture. An NEC Development Permit decides what can be built here.`;
+  if(dc)ban.innerHTML=`<b>Niagara Escarpment development control.</b> Zoning does not govern here. The Regulations section shows the setbacks that keep an addition, deck or porch, or accessory building exempt from an NEC Development Permit, not the zoning setbacks. Anything outside those limits needs an NEC Development Permit.`;
 }
 
 /* ---------------- General provisions: Zoning By-law 05-200, Section 4, residential uses ---------------- */
@@ -802,7 +1122,8 @@ function ringsToPoly(rings,poly){ // 0 when the building is inside or overlaps t
   return ringsToLines(rings,poly.map(r=>r.concat([r[0]])));
 }
 const RURAL=k=>k==="A1"||k==="A2";
-function provisions(G){
+function provisions(G){const r=provisions0(G);try{cityPolicies(r)}catch(e){}return r}
+function provisions0(G){
   const z=zoneDef(),key=S.zone.key||"",R=S.regs,za=S.zone.attrs||{};
   const res=/^(R1|R1A|R2|S1|A1|A2)$/.test(key);
   const law=S.law&&S.law.state==="done"?S.law.res:null;
@@ -810,6 +1131,87 @@ function provisions(G){
   const acc=S.buildings.filter(b=>b.accessory);
   const C=[],X=[];const ok=(v)=>v; // checks and reference rules
   const byType=t=>S.edges.filter(e=>e.type===t);
+  // Former City of Hamilton By-law 6593: supplementary provisions (Sections 18, 18A) as read from the October 2026 consolidation
+  if(/^ANC:/.test(key)){
+    const isER=key==="ANC:ER",isA=key==="ANC:A";
+    C.push({ok:null,s:"info",ref:"87-57",t:"By-law status",v:`${FORMER["87-57"].label}, ${FORMER["87-57"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    if(R.front&&!isER)C.push({ok:null,s:"check",ref:"7.13(c), Sch. C",t:"Schedule C road setback",v:`Yards written “plus any applicable distance in Schedule C” are measured from the road centre line (${M(R.front)} plus the Schedule C distance for this street). The tool shows the base figure only; look the street up in Schedule C.`});
+    const dt=S.dtype;
+    let pk=isER?"Detached dwelling: 2 spaces (7.14(b)(i)(A)). In the ER zone each space is at least 3.0 m × 5.8 m, and a space in a private garage at least 3.5 m × 6.0 m (10.3.6).":"Detached, semi-detached, street townhouse and triplex dwellings: 2 spaces per dwelling unit (7.14(b)(i)(A)). A secondary dwelling unit needs 1 more space (7.14(b)(i)(F)).";
+    if(/^ANC:(R4|R5|RM1|RM2)$/.test(key))pk+=" One of the two spaces must be in a private garage"+(key==="ANC:R4"||key==="ANC:RM1"?" or carport":"")+(key==="ANC:RM2"?" or within the dwelling":"")+".";
+    C.push({ok:null,s:"applies",ref:"7.14",t:"Parking spaces required",v:`${pk} A space may be on the private driveway (7.14(a)(iv)). Spaces provided cannot be measured from map data.`});
+    X.push({ref:"7.12",t:"Yard encroachments",v:`Minimum yards stay open from the ground up, except: sills, cornices, chimneys, bay windows or pilasters ${M(0.6)}; eaves or gutters ${M(0.6)} into a side yard and ${M(1.5)} into a front or rear yard; balconies or open stairs ${M(1.5)} into a front or rear yard and ${M(0.45)} into a side yard; unenclosed porches ${M(1.5)} into a front yard and ${M(0.45)} into a side yard; fire escapes ${M(1.0)} into a side or rear yard. Fences, hedges, trees and shrubs are allowed.${isER?" In the ER zone no balcony, deck or porch is allowed above the first storey in a side yard (10.3.2).":""}`});
+    X.push({ref:"7.18(a)",t:"Accessory buildings",v:`Not in a front yard or in a minimum side yard${isER?" (in the ER zone at least "+M(1.5)+" from a side lot line)":""}. At least ${M(0.75)} from any lot line; on a corner lot at least ${M(7.5)} from the flanking street line, and ${M(7.5)} from the rear line on a through lot. Up to ${M(40)} ground floor area, ${M(4.5)} high, and ${M(90)} total coverage, within the lot coverage limit. Over ${M(12)} floor area it may not sit in the minimum rear yard${isER?" (at least "+M(7.5)+" from the rear lot line in the ER zone)":""}. Eaves and gutters may reach no more than ${M(0.3)} into a required setback.`});
+    X.push({ref:"7.16",t:"Swimming pools",v:`An above-ground pool is at least ${M(1.5)} from any lot line that is not a street, plus the height of its supporting structure above grade, and as far from a street as the dwelling must be. An inground pool may be in the rear yard part of a minimum street side or rear yard but at least ${M(1.5)} from every lot line.`});
+    X.push({ref:"7.13(a)",t:"Corner daylighting triangle",v:`On a corner lot nothing may block vision between ${M(0.75)} and ${M(2.4)} above the street within a ${M(10,0)} daylighting triangle.`});
+    X.push({ref:"9.14, 9.15",t:"Secondary and converted dwellings",v:"Secondary dwelling units follow Subsection 9.14 and converted dwellings Subsection 9.15. Read them before adding a unit."});
+    X.push({ref:"87-57 (scope)",t:"Not modelled yet",v:"RM3 to RM6, RH, D and commercial, institutional and other zones, Figure 1 lots (semi-detached and townhouse), lot area and coverage on irregular lots, Schedule C distances and site-specific exceptions in By-law 87-57 are not loaded."});
+    return {C,X,res:true};
+  }
+  if(/^FL:/.test(key)){
+    C.push({ok:null,s:"info",ref:"90-145-Z",t:"By-law status",v:`${FORMER["90-145-Z"].label}, ${FORMER["90-145-Z"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    C.push({ok:null,s:"applies",ref:"5.21.1",t:"Parking spaces required",v:"Single-detached, semi-detached, duplex, triplex and street townhouse dwellings: 1 space per dwelling unit. A secondary dwelling unit needs 1 more space. Spaces must be on the same lot and in the same zone. Spaces provided cannot be measured from map data."});
+    X.push({ref:"5.2",t:"Accessory buildings",v:`Not in a required front yard or required exterior side yard, at least ${M(1.0)} from an interior side lot line or the rear lot line, and up to ${M(4.6)} high. All accessory buildings together cover no more than 5% of the lot (swimming pools excluded). No deck is allowed in a required front, exterior side or interior side yard. A detached secondary dwelling unit is not an accessory building.`});
+    X.push({ref:"5.30",t:"Yard encroachments",v:`Required yards stay open from the ground to the sky, except: sills, belt courses, cornices, chimney breasts, bay windows, pilasters, eaves or gutters ${M(0.65)}; balconies, canopies, awnings, steps or unenclosed porches ${M(1.5)} into a required front, rear or exterior side yard; fire escapes or exterior stairs ${M(1.5)} into a required exterior side or rear yard; wheelchair ramps without limit.`});
+    X.push({ref:"5.22",t:"Swimming pools",v:`Not in a required front yard. In R1 to R5 (and R6 street townhouses) an inground, above-ground or on-ground pool is at least ${M(1.2)} from the rear lot line and ${M(1.8)} from all other lot lines (measured from the outside edge of any surrounding deck for an above-ground or on-ground pool). R6 townhouse, apartment and retirement home uses need ${M(9.1)}.`});
+    X.push({ref:"5.2.3(e)",t:"Mechanical equipment",v:`Air conditioners and pumps are allowed in a required side or rear yard at least ${M(0.6)} from the lot line, and in a required front yard at least ${M(3.0)} from the street line and ${M(0.6)} from a side lot line if screened.`});
+    X.push({ref:"5.43, 5.44",t:"Secondary and converted dwellings",v:"Secondary dwelling units follow Section 5.43 and converted dwellings Section 5.44. Read them before adding a unit."});
+    X.push({ref:"90-145-Z (scope)",t:"Not modelled yet",v:"R7 to R9, A, CA and rural zones, UD, commercial, institutional, industrial and open-space zones, Figure 1 lots, link and block townhouse rules, sight triangles (5.27), special setbacks (5.28), Niagara Escarpment Plan areas (5.18) and site-specific exceptions of By-law 90-145-Z are not loaded."});
+    return {C,X,res:true};
+  }
+  if(/^GL:/.test(key)){
+    C.push({ok:null,s:"info",ref:"464",t:"By-law status",v:`${FORMER["464"].label}, ${FORMER["464"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    C.push({ok:null,s:"applies",ref:"7.35, 11.6",t:"Parking spaces required",v:`Single-detached, semi-detached, duplex, triplex and street townhouse dwellings: 2 spaces per dwelling unit; a secondary dwelling unit needs 1 more. Tandem parking is allowed. A space is at least ${M(3.0)} × ${M(6.0)} (7.35(a)(vii)). At-grade parking may cover no more than 35% of the lot, no part of the required street side yard of a corner lot may be used for parking, and no space may be within ${M(1.5)} of the rear lot line (11.6). Spaces provided cannot be measured from map data.`});
+    X.push({ref:"7.13(b)",t:"Accessory buildings",v:`Not in a front yard and at least ${M(1.0)} from any lot line; on a corner lot at least ${M(7.5)} from the flanking street line, and ${M(7.5)} from any street line on a through lot or a lot with three street lines. Over 12 m² floor area they may not sit in a minimum rear or side yard. All accessory buildings together are limited to 40 m² and ${M(4.5)} high, within the zone's lot coverage. Eaves and gutters may reach no more than ${M(0.3)} into a required setback.`});
+    X.push({ref:"7.26",t:"Yard encroachments",v:`Required yards stay open from the ground up, except: sills, belt courses, cornices, eaves, gutters, chimneys, bay windows or pilasters ${M(0.5)}; balconies, canopies, fruit cellars or unenclosed porches ${M(1.5)} into a required front or rear yard and ${M(0.5)} into a minimum side yard; fire escapes ${M(1.5)} into a side or rear yard. Fences, hedges, trees and shrubs are allowed. No encroachment into a registered easement.`});
+    X.push({ref:"7.16",t:"Swimming pools and hot tubs",v:`Not in the front yard. An above-ground pool or hot tub (including its deck) and an in-ground pool are each at least ${M(1.5)} from any lot line. Nothing may be over ${M(2.5)} high, and the pool must be fenced at least ${M(1.5)} high with a self-latching gate.`});
+    X.push({ref:"11.5",t:"Open parking and storage",v:`In R1 to R4 no vehicle over ${M(6.4)} long or ${M(2.6)} high, and no trailer or boat, may be parked or stored in the open. In the ER zone one such vehicle, trailer or boat is allowed, at least ${M(4.5)} from the front, flankage and rear lot lines and ${M(1.2)} from an interior side lot line.`});
+    X.push({ref:"11.13, 11.14",t:"Secondary and converted dwellings",v:"Secondary dwelling units follow Subsection 11.13 and converted dwellings Subsection 11.14 (up to four units). Read them before adding a unit."});
+    X.push({ref:"464 (scope)",t:"Not modelled yet",v:"A1 and A2 agricultural, RM1 to RM4, RH, RE, commercial, industrial and open-space zones, Figure 1 lots (semi-detached, duplex and townhouse), special setbacks from streets (7.23) and site-specific exceptions of By-law 464 are not loaded."});
+    return {C,X,res:true};
+  }
+  if(/^SC:/.test(key)){
+    C.push({ok:null,s:"info",ref:"3692-92",t:"By-law status",v:`${FORMER["3692-92"].label}, ${FORMER["3692-92"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    C.push({ok:null,s:"applies",ref:"6.2.4 etc.",t:"Parking spaces required",v:`${key==="SC:RM2"?"2 spaces per dwelling unit (6.9.4)":"2 spaces per dwelling (6.2.4, 6.3.4, 6.4.4, 6.5.4) or per dwelling unit (6.6.4, 6.7.4)"}. At most one may be in the required front yard, and tandem parking is allowed. A space is at least ${M(2.75)} × ${M(5.8)}, or ${M(3.0)} × ${M(6.0)} in a private garage or when not at 90° (4.10.3). Spaces provided cannot be measured from map data.`});
+    X.push({ref:"6.1.4",t:"Accessory buildings",v:`Not in the front yard and at least ${M(8)} from the front lot line, ${M(0.5)} from any other lot line, up to ${M(4.5)} high. A detached garage or carport fronting the flankage lot line is at least ${M(5.5)} from it. All accessory buildings together cover no more than 10% of the lot, and total coverage stays within the zone limit. No accessory building before the main building (4.5.2). A detached secondary dwelling unit is not an accessory building.`});
+    X.push({ref:"4.19",t:"Yard encroachments",v:`Required yards stay open from ground to sky, except: sills, belt courses, cornices, chimney breasts, bay windows, decorative brick facing or pilasters ${M(0.5)}; eaves or gutters ${M(0.5)} (${M(0.25)} on an accessory building); balconies, canopies, unenclosed porches and decks ${M(1.5)} into a required front yard and ${M(4.0)} into a required rear yard; fire escapes ${M(1.5)} into a side or rear yard; brick archways attached to a dwelling. A deck or patio under ${M(0.3)} high may sit in any required yard.`});
+    X.push({ref:"6.1.7, 6.1.9",t:"Secondary and converted dwellings",v:"Secondary dwelling units (including detached ones) and converted dwellings follow Section 6.1.7 and 6.1.9. Read them before adding a unit."});
+    X.push({ref:"3692-92 (scope)",t:"Not modelled yet",v:"RM1, RM3 to RM5, rural and agricultural zones (A, AS, RR, RRE), commercial, industrial and open-space zones, Figure 1 lots, Section 4.13 shoreline setbacks and special exemptions (R1-1, R2-2 and the like) of By-law 3692-92 are not loaded."});
+    return {C,X,res:true};
+  }
+  if(/^DUN:/.test(key)){
+    C.push({ok:null,s:"info",ref:"3581-86",t:"By-law status",v:`${FORMER["3581-86"].label}, ${FORMER["3581-86"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    if(/-FP/i.test((S.zone&&S.zone.code)||""))C.push({ok:false,s:"flag",ref:"FP",t:"Floodplain overlay",v:"The zone code carries an FP (floodplain) suffix. Grand River Conservation Authority or Hamilton Conservation Authority permits and the FP provisions apply on top of the zone rules."});
+    C.push({ok:null,s:"applies",ref:"7.12",t:"Parking spaces required",v:"Single-detached, duplex, semi-detached and street townhouse dwellings: 1.0 space per dwelling unit. A secondary dwelling unit needs 1 more space. Spaces provided cannot be measured from map data."});
+    X.push({ref:"6.6",t:"Yard encroachments",v:`Required yards stay open from the lowest level up, except: a bay, balcony or dormer ${M(1.0)} into a front yard (not closer than ${M(1.5)} to the street line), ${M(1.5)} into a rear yard, or into a side yard one-third its width or ${M(1.5)}, whichever is less; a canopy, cornice, eave or gutter ${M(1.5)} into a front yard (not closer than ${M(1.5)} to the street line) or rear yard, or into a side yard half its width or ${M(1.0)}, whichever is less; a chimney, sill, leader, pilaster, lintel or ornamental projection ${M(0.5)} into a side yard and ${M(1.0)} into any other yard; an open fire escape or stairway ${M(1.5)} into a rear yard, or into a side yard one-third its width or ${M(1.5)}. An existing building may encroach to reface it (6.6.7).`});
+    X.push({ref:"8.5 (and equivalents)",t:"Accessory buildings",v:`Under 10 m² floor area: rear yard or non-required side yard, at least ${M(1.0)} from the side and rear lot lines (${M(3.5)} from the flankage street on a corner lot), up to ${M(2.0)} high. 10 m² to 18 m²: at least ${M(2.0)} from side and rear lines, up to 5% lot coverage and ${M(4.0)} high. Over 18 m²: must meet the dwelling's yard and zone rules. Where the garage is not part of the dwelling: rear yard or non-required side yard, ${M(2.0)} from side and rear lines, up to 41 m² and ${M(4.0)} high, and the dwelling needs a ${M(3.0)} side yard on one side of an interior lot. Read the zone’s own accessory-building clause to confirm.`});
+    X.push({ref:"6.8",t:"Fences",v:`Up to ${M(1.9)} high in residential zones, with a lower limit in front yards. Read 6.8 for the front-yard figure.`});
+    X.push({ref:"6.7",t:"Existing small lots",v:"A single-detached dwelling may be built on a lot that is smaller than the zone requires if the lot was held separately on the date the by-law passed and the dwelling meets every other requirement."});
+    X.push({ref:"6.10",t:"Mechanical equipment",v:`Air conditioners and pumps are allowed in a required side or rear yard at least ${M(0.6)} from the lot line, and in a required front yard at least ${M(3.0)} from the street line and ${M(0.6)} from a side lot line if screened.`});
+    X.push({ref:"3581-86 (scope)",t:"Not modelled yet",v:"RM1 to RM4, RH-1, commercial, institutional, industrial and open-space zones, retirement homes, lot coverage, density, Section 6.31 secondary units and site-specific (S-) provisions of By-law 3581-86 are not loaded."});
+    return {C,X,res:true};
+  }
+  if(/^H6593:/.test(key)){
+    const fl=S.edges.filter(e=>e.type==="front").reduce((s,e)=>s+e.len,0);
+    C.push({ok:null,s:"info",ref:"6593",t:"By-law status",v:`${FORMER["6593"].label}, ${FORMER["6593"].asof}. The City publishes this copy for convenience only: the original by-law and amendments at the City Clerk govern.`});
+    if(R.front)C.push({ok:null,s:"applies",ref:"18(3)(iii)",t:"Front yard averaging",v:`On an interior lot between two buildings that are not more than ${M(30,0)} apart, the front yard may equal the average of the two neighbouring front yards, but never less than 70% of the district requirement. Here that floor is ${M(0.7*R.front)} (district requirement ${M(R.front)}).`});
+    if(fl>0&&/^H6593:(AA|B|B-1|B-2|C|D|R-4)$/.test(key))C.push({ok:null,s:"applies",ref:"18(3)",t:"Lot of record too small",v:`A single family dwelling may still be built on an undersized lot of record if each side yard is at least 10% of the lot width (never under ${M(0.9)}) and the rear yard is at least 25% of the lot depth (never under ${M(3.0)}). On this lot's ${M(fl,1)} front lot line, the side yard floor is ${M(Math.max(0.9,0.1*fl))}.`});
+    const dt=S.dtype;
+    let pk="";
+    if(dt==="single")pk="Single family dwelling: 2 parking spaces for each Class A dwelling unit for the first 8 habitable rooms, plus 0.5 space for each additional habitable room (Table 1, item 1(a)).";
+    else if(dt==="duplex")pk="Two family dwelling: 1 space per Class A dwelling unit, so 2 spaces (Table 1, item 1(b)).";
+    else if(dt==="triplex")pk="Three family dwelling: 1.33 spaces per Class A dwelling unit (Table 1, item 1(c)).";
+    else if(dt==="semi")pk="The parking table has no separate line for semi-detached dwellings. Confirm the rate with the by-law (Table 1, item 1).";
+    else pk="See Table 1, item 1 for this dwelling type.";
+    C.push({ok:null,s:"applies",ref:"18A Table 1",t:"Parking spaces required",v:`${pk} Spaces provided cannot be measured from map data. Space and manoeuvring sizes are in Section 18A and Table 6.`});
+    X.push({ref:"18(3)",t:"Yard encroachments",v:`Required yards must be open from the ground up, except: chimney, sill, belt course or similar ${M(0.5)} into a side yard and ${M(1.0)} into any other yard; canopy, cornice, eave or gutter ${M(1.5)} into a front yard (not closer than ${M(1.5)} to the street line) or rear yard, and into a side yard half its width or ${M(1.0)}, whichever is less; open fire escape or stair ${M(1.0)} into a rear yard, or into a side yard one-third its width or ${M(1.0)}, whichever is less; bay, balcony or dormer ${M(1.0)} into a front yard (not closer than ${M(1.5)} to the street line) or rear yard, or into a side yard one-third its width or ${M(1.0)}; vestibule ${M(1.2)}; roofed one-storey unenclosed porch ${M(3.0)} into a front or rear yard, at least ${M(1.5)} from the front lot line. Added together, projections may not exceed one-third of the yard width, and never ${M(3.0)}. An existing building may encroach ${M(0.15)} to reface it.`});
+    X.push({ref:"18(4)",t:"Accessory buildings",v:`Not in a front yard or required side yard, and not built before the principal building. A detached one lies entirely in the rear yard at least ${M(0.45)} from the nearest lot line and covers no more than 30% of the required rear and side yards combined. Height up to ${M(4.0)}; higher than that, at least ${M(3.0)} from the nearest lot line. On a corner lot, no closer to the street line than the front yard required for a dwelling on the lot next door (with exceptions). A detached secondary dwelling unit is not an accessory building.`});
+    X.push({ref:"18(4)(ia)–(if)",t:"Swimming pools",v:`An above ground pool in a rear yard is at least ${M(1.2)} from the nearest lot line; an inground pool in a rear yard at least ${M(1.0)}. In a front or side yard, at least the minimum distance a building must keep from the lot line. Not more than 50% of the rear yard may be taken up by an above ground pool and accessory buildings together.`});
+    X.push({ref:"18(3)(f)",t:"Fences and hedges",v:`Up to ${M(2.0)} high within a required yard in a residential district, and no more than ${M(0.8)} within ${M(9.0)} of the intersection of two or more streets.`});
+    X.push({ref:"19",t:"Residential conversion",v:"Section 19 sets extra rules for converting a dwelling in the AA, B, B-1, B-2, C, D and R-2 districts. Read it before adding units."});
+    X.push({ref:"6593 (scope)",t:"Not modelled yet",v:"Multiple dwelling and townhouse districts (DE, DE-2, DE-3, E, E-1 to E-3, RT-10, RT-20, RT-30, R-2), commercial and other districts, and site-specific exceptions in By-law 6593 are not loaded. Reading the building footprint against accessory building and parking rules is not done for this by-law."});
+    return {C,X,res:true};
+  }
   // 4.31 NEC development control
   if(law&&law.necDC&&!law.necDC.error&&law.necDC.feats.length)
     C.push({ok:false,s:"flag",ref:"4.31",t:"Niagara Escarpment development control",v:"The lot is in the NEC Development Control Area, so zoning has no effect and is for information only. The NEC Development Permit governs."});
@@ -863,6 +1265,28 @@ function provisions(G){
   } else if(/^(A1|A2|S1)$/.test(key)){
     const ha=G.lotArea/10000;
     C.push({ok:null,s:"applies",ref:"4.33.3–4.33.4",t:"Additional dwelling units",v:`One additional unit is allowed only on lots over 0.6 ha (1.48 ac): this lot is ${fmt(ha,2)} ha (${fmt(ha*2.47105,2)} ac), so it ${ha>0.6?"qualifies":"does not qualify"}. A detached additional unit needs at least 1.5 ha (3.71 ac): ${ha>=1.5?"qualifies":"does not qualify"}. Not permitted on lands in Special Figures 24.1 to 24.5. Septic and well must meet Section 4.22.`});
+  }
+  // Section 5 parking (By-law 05-200, Section 5 PDF dated Aug 2026, marked not final; parts under appeal OLT-24-000544)
+  if(/^(R1|R1A|R2|S1|A1|A2)$/.test(key)){
+    const dt=DTYPES[S.dtype]||DTYPES.single;const units=S.dtype==="town"?(S.townUnits||3):dt.units;
+    const praNum=S.pra&&S.pra.name?((S.pra.name.match(/(\d+)/)||[])[1]||""):"";
+    const praTxt=S.example?"Parking rate area not known for the example lot":(S.pra&&S.pra.failed?"The City parking-rate-area layer did not answer":(praNum?`This lot is in Parking Rate Area ${praNum}`:"This lot is outside Parking Rate Areas 1 and 2 (all other areas rate applies)"));
+    let req=null,txt="",confirm=false;
+    const per1=praNum==="1", per2=praNum==="2";
+    if(S.dtype==="single"||S.dtype==="semi"||S.dtype==="custom"){const n=S.dtype==="semi"?2:1;req=per1?0:n;txt=per1?"No spaces required in Parking Rate Area 1.":`One space per unit (${n} unit${n>1?"s":""}).`}
+    else if(S.dtype==="duplex"){req=per1?0:1;txt=per1?"No spaces required in Parking Rate Area 1.":"One space in total for the duplex."}
+    else if(S.dtype==="triplex"){req=per1?0:(per2?2:3);txt=per1?"No spaces required in Parking Rate Area 1.":(per2?"Two spaces in total in Parking Rate Area 2.":"One space per unit (3 units).")}
+    else if(S.dtype==="fourplex"){req=per1?0:(per2?3:4);txt=per1?"No spaces required in Parking Rate Area 1.":(per2?"Three spaces in total in Parking Rate Area 2.":"One space per unit (4 units).")}
+    else if(S.dtype==="town"){req=units;txt=`One space per unit (${units} units).`;confirm=per1}
+    const known=!S.example&&!(S.pra&&S.pra.failed);
+    C.push({ok:null,s:(known&&!confirm)?"applies":"check",ref:"5.7.1 a)",t:"Parking spaces required",v:`${praTxt}. ${txt}${req!=null&&!confirm?` Required: <b>${req}</b> space${req===1?"":"s"}.`:""}${confirm?" The City text does not clearly give a street townhouse rate for Parking Rate Area 1: confirm with the by-law.":""} Not required for uses in an existing building if the existing number of spaces is kept (5.1.1 b)). Spaces provided cannot be measured from map data.`});
+    const fl=S.edges.filter(e=>e.type==="front").reduce((s,e)=>s+e.len,0);
+    const lim=fl>0?Math.min(fl*0.5,8.0):null;
+    X.push({ref:"5.2.1",t:"Parking space size",v:`At least ${M(2.8)} wide by ${M(5.8)} long. Add ${M(0.3)} of width for each side against a wall, column or other obstruction. Add the depth of any stairs entering an attached garage space (an open stairway up to ${M(0.75)} may project if ${M(0.5)} high or less).`});
+    X.push({ref:"5.3.2 a)",t:"Driveway (single, semi, duplex, triplex, fourplex)",v:`Not wider than the attached garage and not closer to a side lot line than the dwelling. If the garage is under ${M(5.0)} wide, the driveway may widen to ${M(5.0)}, at least ${M(0.6)} from a side lot line. With no attached garage, front yard driveway width is the lesser of 50% of lot width or ${M(8.0)}${lim?` (about ${M(lim)} on this lot's ${M(fl,1)} front lot line)`:""}. One driveway per dwelling unit; corner lots one per street; lots ${M(30)} wide or more may have two; none through a daylight triangle. Access driveways at least ${M(2.7)} wide (5.2.4 b)).`});
+    if(S.dtype==="town")X.push({ref:"5.3.3 a)",t:"Street townhouse parking",v:`Required parking at least ${M(5.8)} from the street line the driveway uses, and none in a required front or flankage yard.`});
+    X.push({ref:"5.1.4, 5.7.4",t:"Electric vehicle parking",v:"Electric vehicle ready rates apply to new residential parking. The City marks s. 5.7.4 a) i. “not final and binding” (By-law 24-052) and the EV definition is under appeal, so confirm the current rate before relying on it."});
+    X.push({ref:"5 (status)",t:"Parking section status",v:"The City's Section 5 text used here is dated August 2026 and is labelled not final. Portions of Section 5 remain under City-wide appeal (OLT-24-000544), with site-specific appeals on 5.1.4 d) and e), 5.7.1 a) i. b) and 5.7.4 a) ii. The by-law page is consolidated as of October 2026. Confirm against the City's current Section 5 before submitting."});
   }
   // reference rules (not measurable from map data)
   X.push({ref:"4.6",t:"Permitted yard encroachments",v:`Into a required yard: sills, eaves, chimney breasts and similar ${M(0.6)}; porch, deck or canopy ${M(1.5)}; fire escape or exterior stair (side or rear yard) ${M(1.5)}; balcony ${M(1.0)} (side yard: one-third of the yard width or 1.0 m, whichever is less); bay window without foundation ${M(0.6)}, max ${M(3.0)} wide; each limited to half the required yard. Recladding an existing building ${M(0.15)}; wall-mounted EV charger ${M(0.3)}; wheelchair ramps unlimited.`});
@@ -940,6 +1364,44 @@ function existingAnalysis(lotArea){
   return {total,checks:out,main};
 }
 
+/* ---------------- Legal description (Lot, Concession, Plan) ---------------- */
+const ONLAND_URL="https://www.onland.ca/ui/62/property/address";
+function legalRowsHtml(){
+  const L=S.legal||{},M=S.manual||(S.manual={lot:"",con:"",planLot:"",regPlan:""});
+  const inp=(id,key,label)=>`<input class="legal-in" id="${id}" value="${esc(M[key])}" placeholder="from ONLAND" aria-label="${label}" oninput="S.manual.${key}=this.value">`;
+  return `<dt>Lot</dt><dd>${inp("mLot","lot","Lot")}</dd>
+    <dt>Concession</dt><dd>${inp("mCon","con","Concession")}</dd>
+    <dt>Plan lot</dt><dd>${inp("mPlanLot","planLot","Plan lot")}</dd>
+    <dt>Registered plan no.</dt><dd>${inp("mRegPlan","regPlan","Registered plan number")}</dd>
+    <dd class="legal-note">${L.failed?"The City plan layer did not respond. ":""}Lot, concession and plan details are not in City data. <a href="${ONLAND_URL}" target="_blank" rel="noopener">Open ONLAND</a>, search the address (street number, street name, requested by), then paste the “Property Details” text below.${L.plan62M&&L.planName?` City map shows ${esc(L.plan62M)} (${esc(L.planName)}).`:""}
+      <textarea class="legal-paste" id="onlandPaste" rows="2" placeholder="e.g. PT LT 26 PL 1431 GEORGE HAMILTON SURVEY… or PT LOT 15 CON 2 BARTON…" aria-label="ONLAND property details"></textarea>
+      <button type="button" class="legal-btn" onclick="applyOnland()">Fill from ONLAND text</button> <span id="onlandMsg"></span></dd>`;
+}
+/* Pull Lot, Concession, Plan lot and Registered plan no. out of an ONLAND legal description. */
+function parseLegal(t){
+  const s=String(t||"").replace(/\s+/g," ").trim();
+  const out={};
+  const pl=s.match(/(?:REGISTRAR'?S?\s+COMPILED\s+PLAN|\bPLAN|\bPL\.?)\s+((?:62M-?|65M-?|M-?)?\d+[A-Z]?)/i);
+  if(pl)out.regPlan=pl[1].toUpperCase();
+  const con=s.match(/\bCON(?:C|CESSION)?\.?\s+([0-9]+[A-Z]?|[IVXL]+)\b/i);
+  if(con)out.con=con[1].toUpperCase();
+  const lot=s.match(/\b(?:LOTS?|LTS?)\s+([0-9A-Z]+(?:\s*(?:,|&|AND|-|TO)\s*[0-9A-Z]+)*)(?=\s+(?:PL\b|PLAN\b|CON\b|CONC|REGISTRAR|P\.|IN\b)|\s*[,;]|$)/i);
+  if(lot)out.lot=lot[1].replace(/\s+/g," ").toUpperCase();
+  return out;
+}
+function applyOnland(){
+  const box=document.getElementById("onlandPaste"),msg=document.getElementById("onlandMsg");if(!box)return;
+  const r=parseLegal(box.value);S.manual=S.manual||{lot:"",con:"",planLot:"",regPlan:""};
+  const M=S.manual,got=[];
+  // a lot named with a plan is the plan lot; a lot named with a concession is the lot
+  if(r.regPlan){M.regPlan=r.regPlan;got.push("plan "+r.regPlan);if(r.lot){M.planLot=r.lot;got.push("plan lot "+r.lot)}}
+  if(r.con){M.con=r.con;got.push("concession "+r.con);if(r.lot){M.lot=r.lot;got.push("lot "+r.lot)}}
+  if(!r.regPlan&&!r.con&&r.lot){M.lot=r.lot;got.push("lot "+r.lot)}
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v};
+  set("mLot",M.lot);set("mCon",M.con);set("mPlanLot",M.planLot);set("mRegPlan",M.regPlan);
+  msg.textContent=got.length?`Filled in: ${got.join(", ")}. Check against ONLAND.`:"Could not find a lot, concession or plan in that text. Type them in instead.";
+}
+
 /* ---------------- Sidebar rendering ---------------- */
 function renderSidebar(G){
   const a=S.parcelAttrs||{};
@@ -952,27 +1414,42 @@ function renderSidebar(G){
     ${cityLot.size?`<dt>Lot size (City record)</dt><dd>${cityLot.size}</dd>`:""}
     ${fr?`<dt>Frontage × depth (City record)</dt><dd>${cityLot.dims}</dd>`:""}
     ${a.PROPERTY_NUM?`<dt>Roll number</dt><dd>${esc(a.PROPERTY_NUM)}</dd>`:""}
+    ${legalRowsHtml()}
     <dt>Buildable envelope</dt><dd>${fmt(G.envArea)} m² (${fmt(G.envArea/G.lotArea*100)}% of lot)</dd>`;
   const z=zoneDef(),za=S.zone.attrs||{};
   const badge=$("zbadge");badge.textContent=S.zone.code||"?";badge.classList.toggle("unknown",!z);
   let meta=`<b>${esc(z?z.name:(za.ZONING_DESC||"Zone not in this tool"))}</b>`;
   const parent=za.PARENT_BY_LAW_NUMBER;
-  if(z) meta+=`By-law 05-200, Section ${z.section}${S.zone.fromCA?" (Council approved)":""}`;
+  if(z) meta+=`By-law ${z.bylaw||"05-200"}, Section ${z.section}${S.zone.fromCA?" (Council approved)":""}${z.bylaw&&FORMER[z.bylaw]?` · ${FORMER[z.bylaw].asof}`:""}`;
   else meta+=`${parent?"Parent by-law "+esc(parent)+". ":""}Regulations below are placeholders; enter the ones from the governing by-law.`;
   $("zmeta").innerHTML=meta;
   const chips=[];
   if(za.PARENT_BY_LAW_URL)chips.push(`<a class="chip" target="_blank" rel="noopener" href="${esc(za.PARENT_BY_LAW_URL)}">By-law ${esc(parent||"")}</a>`);
-  else if(z)chips.push(`<a class="chip" target="_blank" rel="noopener" href="${BYLAW_URL}">By-law 05-200</a>`);
+  else if(z)chips.push(`<a class="chip" target="_blank" rel="noopener" href="${z.url||BYLAW_URL}">By-law ${z.bylaw||"05-200"}</a>`);
   if(za.BY_LAW_URL&&za.BY_LAW_NUMBER)chips.push(`<a class="chip" target="_blank" rel="noopener" href="${esc(za.BY_LAW_URL)}">Amending ${esc(za.BY_LAW_NUMBER)}</a>`);
   [1,2,3].forEach(i=>{const ex=za["EXCEPTION"+i];if(ex&&String(ex).trim()){const url=za[`EXCEPTION${i}_URL`];chips.push(url?`<a class="chip flag" target="_blank" rel="noopener" href="${esc(url)}">Exception ${esc(ex)}</a>`:`<span class="chip flag">Exception ${esc(ex)}</span>`)}
     const ho=za["HOLDING"+i];if(ho&&String(ho).trim()){const url=za[`HOLDING${i}_URL`];chips.push(url?`<a class="chip flag" target="_blank" rel="noopener" href="${esc(url)}">Holding ${esc(ho)}</a>`:`<span class="chip flag">Holding ${esc(ho)}</span>`)}});
   if(S.zone.ca&&S.zone.attrs)chips.push(`<span class="chip flag">Also Council-approved zone ${esc(S.zone.ca.ZONING_CODE)}</span>`);
+  if(z&&z.bylaw&&excOf())chips.push(`<span class="chip flag">Site-specific provision or overlay ${esc(excOf())}: may change these rules</span>`);
+  {const siteSpecific=!S.example&&((/\//.test(S.zone.code||""))||[1,2,3].some(i=>za["EXCEPTION"+i])||za.BY_LAW_NUMBER||[1,2,3].some(i=>za["HOLDING"+i]));
+   if(siteSpecific){
+     const amend=za.BY_LAW_NUMBER?String(za.BY_LAW_NUMBER):"";
+     const subj=encodeURIComponent(`Zoning inquiry: site-specific provisions at ${S.address||a0().LOCATION||"property"} (zone ${S.zone.code||""})`);
+     const body=encodeURIComponent(`Hello,\n\nPlease send the text of the site-specific zoning provisions (exceptions, holding provisions or amending by-laws) that apply to ${S.address||"this property"}, zoned ${S.zone.code||""}${amend?` (amending By-law ${amend})`:""}, and tell me whether the City's current by-law differs from the consolidation online.\n\nThank you.`);
+     chips.push(`<a class="chip" target="_blank" rel="noopener" href="${LOOKUP.search}">Search City by-laws${amend?` for ${esc(amend)}`:""}</a>`);
+     chips.push(`<a class="chip" target="_blank" rel="noopener" href="${LOOKUP.map}">City interactive zoning map</a>`);
+     chips.push(`<a class="chip" target="_blank" rel="noopener" href="${LOOKUP.verify}">Zoning verification report</a>`);
+     chips.push(`<a class="chip" href="mailto:${LOOKUP.email}?subject=${subj}&body=${body}">Email City zoning staff</a>`);
+   }}
   if(za.TEMPORARY_USE_1)chips.push(`<span class="chip flag">Temporary use ${esc(za.TEMPORARY_USE_1)}</span>`);
   $("zchips").innerHTML=chips.join("");
 
 
   const R=S.regs;
   $("regref").textContent=R.ref&&R.ref!=="assumed"?`· s. ${R.ref}${S.dtype==="single"&&zoneDef()&&/^R/.test(S.zone.key)?" (single detached)":""}`:"· assumed";
+  const nd=necExDef();
+  if(nd)$("regref").textContent="· NEC exemption · "+nd.short;
+  $("necBox").hidden=!nd;if(nd)$("necMode").value=S.necMode||"addition";
   const rows=[
     ["front","Front yard setback","m","var(--setback)"],["side","Side yard setback","m","var(--setback)"],
     ["flank","Flankage (corner) setback","m","var(--setback)"],["rear","Rear yard setback","m","var(--setback)"],
@@ -986,9 +1463,11 @@ function renderSidebar(G){
   renderLaw();
   renderProvisions(G);
   const notes=[...(z&&z.notes||[])];
+  if(nd)notes.unshift(`<b>Niagara Escarpment Area of Development Control.</b> These are not the zoning setbacks. They are the distances that keep work exempt from an NEC Development Permit (R.R.O. 1990, Reg. 828). ${nd.note} Work outside these limits needs an NEC Development Permit. Check the in-force regulation and the NEC's self-assessment before relying on this.`);
   if(z&&z.restricted)notes.unshift(`This land is zoned for conservation or hazard protection. See Section ${z.section} and consult the Conservation Authority before planning any building.`);
-  if(!z)notes.unshift("This zone is not one of the 05-200 zones loaded here (or it falls under a former municipal by-law). The setbacks shown are placeholders.");
-  notes.push("Setbacks are drawn as true distances from each lot line. Permitted encroachments (porches, eaves, steps) under Section 4 are not shown.");
+  if(!z)notes.unshift("This zone is not one of the zones loaded here (05-200 residential and rural zones, and the residential zones of the former Hamilton, Ancaster, Dundas, Stoney Creek, Glanbrook and Flamborough by-laws). The setbacks shown are placeholders.");
+  if(z&&z.bylaw&&excOf())notes.unshift(`This lot has a site-specific provision (${esc(excOf())}) in By-law ${z.bylaw}. It can change the setbacks, uses or lot sizes shown here. Search the City’s by-law database for the provision number${S.zone.attrs&&S.zone.attrs.BY_LAW_NUMBER?` (amending By-law ${esc(String(S.zone.attrs.BY_LAW_NUMBER))})`:""}, or use the links under the zone to look it up. Read it before relying on these numbers.`);
+  notes.push(`Setbacks are drawn as true distances from each lot line. Permitted encroachments (porches, eaves, steps) under ${z&&z.bylaw?"the by-law’s supplementary provisions ("+(FORMER[z.bylaw]?FORMER[z.bylaw].enc:"Section 18")+")":"Section 4"} are not shown.`);
   $("notes").innerHTML=notes.map(n=>`<p style="margin:0 0 6px">${n}</p>`).join("");
   $("exampleTag").hidden=!S.example;
 }
@@ -1317,24 +1796,29 @@ function reportData(){
   const RN={front:"front yard",side:"side yard",flank:"flankage yard",rear:"rear yard",height:"maximum height",coverage:"lot coverage",landscaped:"landscaped area",sideAgg:"aggregate side yards",lotArea:"minimum lot area",lotAreaPerUnit:"lot area per unit",lotWidth:"lot width",lotWidthPerUnit:"lot width per unit",unitWidth:"unit width"};
   if(edited.length)P.push(`Note: these regulations were changed from the by-law values to test a possible variance: ${edited.map(k=>`${RN[k]||k} (${fmt(R[k],1)})`).join(", ")}.`);
 
-  const propRows=[["Address",addr],["Roll number",a.PROPERTY_NUM||"–"],["Lot area (mapped)",`${fmt(G.lotArea)} m² · ${fmt(G.lotArea*10.7639)} ft²`],
+  const LG=true,MN=S.manual||{};
+  const legalRows=LG?[["Lot",(MN.lot||"").trim()||"–"],["Concession",(MN.con||"").trim()||"–"],["Plan lot",(MN.planLot||"").trim()||"–"],["Registered plan no.",(MN.regPlan||"").trim()||"–"]]:[];
+  const propRows=[["Address",addr],["Roll number",a.PROPERTY_NUM||"–"],...legalRows,["Lot area (mapped)",`${fmt(G.lotArea)} m² · ${fmt(G.lotArea*10.7639)} ft²`],
     ["Lot size (City record)",city.size||"–"],["Frontage × depth (City record)",city.dims||"–"],["Front lot line (mapped)",`${fmt(front,1)} m`],
     ["Buildable envelope",`${fmt(G.envArea)} m² (${fmt(G.envArea/G.lotArea*100)}% of lot)`]];
   const zoneRows=[["Zone",`${S.zone.code||"?"} · ${zoneName}`],["By-law",parent?`${parent}${z?`, Section ${z.section}`:""}`:"–"]];
   [1,2,3].forEach(i=>{if(za["EXCEPTION"+i])zoneRows.push([`Exception ${i}`,String(za["EXCEPTION"+i])]);if(za["HOLDING"+i])zoneRows.push([`Holding ${i}`,String(za["HOLDING"+i])])});
   if(za.BY_LAW_NUMBER)zoneRows.push(["Amending by-law",String(za.BY_LAW_NUMBER)]);
   if(S.zone.ca&&S.zone.attrs)zoneRows.push(["Council-approved zone (also applies)",String(S.zone.ca.ZONING_CODE)]);
+  if(necExDef())zoneRows.push(["Niagara Escarpment","Area of Development Control: setbacks shown are the NEC permit-exemption distances for "+necExDef().short+", not zoning; an NEC Development Permit governs anything outside them"]);
   const regRows=[["front","Front yard","m"],["side","Side yard","m"],["flank","Flankage yard","m"],["rear","Rear yard","m"],["height","Maximum height","m"],["coverage","Maximum lot coverage","%"],["landscaped","Minimum landscaped area","%"],["sideAgg","Aggregate side yards","m"],["lotArea","Minimum lot area","m²"],["lotAreaPerUnit","Minimum lot area per unit","m²"],["lotWidth","Minimum lot width","m"],["lotWidthPerUnit","Minimum lot width per unit","m"],["unitWidth","Minimum unit width","m"]]
     .filter(([k])=>R[k]!=null&&!/^(lotArea|lotAreaPerUnit|lotWidth|lotWidthPerUnit|unitWidth)$/.test(k)).map(([k,l,u])=>[l,`${fmt(R[k],k==="lotArea"||k==="lotAreaPerUnit"?0:1)} ${u}`,k in S.edited?"Changed for testing":(R.ref==="assumed"?"Assumed":`s. ${R.ref}`)]);
   const existRows=E?S.buildings.map((b,i)=>[`${b.accessory?"Accessory":"Main"} building ${i+1}`,`${M2(b.area)} · eave ${M(b.eave)} · ridge ${M(b.ridge)}`,b.src==="assumed"?"Height assumed":"Height entered"]):[];
   const toCheckRows=c=>c.map(x=>[x.label,x.val,x.ok===null?"Info":x.ok?"Meets":"Does not meet"]);
-  return {meta:{date:new Date().toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"}),addr,forWho:$("rpFor").value.trim(),byWho:$("rpBy").value.trim(),firm:$("rpFirm").value.trim()||"Vanderlinde Design",file:$("rpFile").value.trim(),example:S.example},
+  return {meta:{bylawLabel:(z&&z.bylaw&&FORMER[z.bylaw])?FORMER[z.bylaw].label:"Zoning By-law 05-200",date:new Date().toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"}),addr,forWho:$("rpFor").value.trim(),byWho:$("rpBy").value.trim(),firm:$("rpFirm").value.trim()||"Vanderlinde Design",file:$("rpFile").value.trim(),example:S.example},
     summary:P,propRows,zoneRows,regRows,law,existRows,existChecks:E?toCheckRows(E.checks):[],
     gpRows:GP.C.map(c=>[`s. ${c.ref} · ${stripTags(c.t)}`,stripTags(c.v),GP_WORD[c.s]]),
     gpRefRows:GP.X.map(c=>[`s. ${c.ref} · ${c.t}`,c.v]),
     sources:["City of Hamilton open GIS: property parcels, Zoning By-law 05-200 zoning boundaries, building footprints, railways, 2017 contours, policy planning and heritage layers (spatialsolutions.hamilton.ca).",
       "Province of Ontario, Land Information Ontario: Niagara Escarpment Commission map service (Area of Development Control, Plan areas and designations).",
-      "City of Hamilton Zoning By-law 05-200, sections supplied for review (Sections 1–5, 7.5–7.8, 12.1–12.3, 15.1–15.3, Schedule D)."]};
+      ...((z&&z.bylaw&&FORMER[z.bylaw])?[`${FORMER[z.bylaw].label}, ${FORMER[z.bylaw].asof} (City PDF: ${FORMER[z.bylaw].url}). ${FORMER[z.bylaw].secs} as they apply to this zone.`]:[]),
+      "City of Hamilton Zoning By-law 05-200, sections supplied for review (Sections 1–5, 7.5–7.8, 12.1–12.3, 15.1–15.3, Schedule D).",
+      "City of Hamilton Zoning By-law 05-200, Section 5 Parking Regulations (City PDF dated August 2026, marked not final; portions under appeal OLT-24-000544) and the Parking Rate Areas map layer. The by-law page reads consolidated as of October 2026."]};
 }
 
 const reAddr=a=>/hamilton|,\s*ON\b/i.test(a)?a:a+", Hamilton, Ontario";
@@ -1379,7 +1863,7 @@ figcaption{font:9pt "Source Sans 3",sans-serif;color:#55666a;margin-top:4px}
 </style></head><body>
 <div class="bar"><button onclick="window.print()">Print or save as PDF</button><span>Choose “Save as PDF” as the printer to keep a copy.</span></div>
 <div class="page">
-<div class="lh"><div><div class="title">Zoning Report</div><div class="by">Prepared by ${esc(m.byWho||m.firm)}</div></div><div class="sub">Preliminary zoning and site review<br>City of Hamilton · Zoning By-law 05-200</div></div>
+<div class="lh"><div><div class="title">Zoning Report</div><div class="by">Prepared by ${esc(m.byWho||m.firm)}</div></div><div class="sub">Preliminary zoning and site review<br>City of Hamilton · ${esc(m.bylawLabel)}</div></div>
 ${m.example?`<div class="ex">This letter describes the built-in example lot, not a real property.</div>`:""}
 <div class="meta"><b>Date</b><span>${esc(m.date)}</span>${m.forWho?`<b>To</b><span>${esc(m.forWho)}</span>`:""}${m.file?`<b>File</b><span>${esc(m.file)}</span>`:""}<b>Property</b><span>${esc(m.addr)}</span></div>
 <p>${m.forWho?`Dear ${esc(m.forWho)},`:"To whom it may concern,"}</p>
@@ -1433,7 +1917,7 @@ async function exportDocx(){
     const kids=[
       new Paragraph({children:[t("ZONING REPORT",{bold:true,size:44})],spacing:{after:40}}),
       new Paragraph({children:[t(`Prepared by ${m.byWho||m.firm}`,{bold:true,size:26})],border:{bottom:{style:BorderStyle.SINGLE,size:18,color:INK,space:6}},spacing:{after:80}}),
-      para("Preliminary zoning and site review · City of Hamilton · Zoning By-law 05-200",{size:18,color:GREY,after:300}),
+      para("Preliminary zoning and site review · City of Hamilton · "+D.meta.bylawLabel,{size:18,color:GREY,after:300}),
       ...(m.example?[para("This letter describes the built-in example lot, not a real property.",{bold:true,color:"8A6A00"})]:[]),
       para(m.date,{after:60}),...(m.forWho?[para("To: "+m.forWho,{after:60})]:[]),...(m.file?[para("File: "+m.file,{after:60})]:[]),
       para(`Property: ${m.addr}`,{after:240}),
@@ -1505,6 +1989,27 @@ function boot(){
   initMap();init3d();loadExample();
 }
 boot();
+
+{const nm=document.getElementById("necMode");if(nm)nm.addEventListener("change",e=>{S.necMode=e.target.value;renderAll(false)});}
+/* ---------------- Adjustable sidebar ---------------- */
+(function(){
+  const app=document.querySelector(".app"),g=document.getElementById("gutter");if(!app||!g)return;
+  const MIN=260,DEF=Math.max(300,Math.min(480,Math.round(innerWidth*0.42))),maxW=()=>Math.max(MIN+40,Math.min(900,Math.round(innerWidth*0.7)));
+  const clamp=v=>Math.max(MIN,Math.min(maxW(),v));
+  const set=(v,save)=>{v=clamp(v);app.style.setProperty("--sbw",v+"px");g.setAttribute("aria-valuenow",v);g.setAttribute("aria-valuemax",maxW());
+    if(save){try{localStorage.setItem("zoningSidebarW",String(v))}catch(e){}}
+    try{if(typeof map!=="undefined"&&map&&map.invalidateSize)map.invalidateSize()}catch(e){}};
+  let start=DEF;try{const v=parseInt(localStorage.getItem("zoningSidebarW"),10);if(v)start=v}catch(e){}
+  set(start,false);
+  g.addEventListener("pointerdown",e=>{e.preventDefault();g.setPointerCapture(e.pointerId);g.classList.add("drag");document.body.classList.add("resizing");});
+  g.addEventListener("pointermove",e=>{if(!g.classList.contains("drag"))return;set(e.clientX-app.getBoundingClientRect().left,false)});
+  const end=e=>{if(!g.classList.contains("drag"))return;g.classList.remove("drag");document.body.classList.remove("resizing");set(e.clientX-app.getBoundingClientRect().left,true)};
+  g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end);
+  g.addEventListener("dblclick",()=>set(DEF,true));
+  g.addEventListener("keydown",e=>{const cur=parseInt(g.getAttribute("aria-valuenow"),10)||DEF;
+    if(e.key==="ArrowLeft"){e.preventDefault();set(cur-24,true)}else if(e.key==="ArrowRight"){e.preventDefault();set(cur+24,true)}else if(e.key==="Home"){e.preventDefault();set(MIN,true)}else if(e.key==="End"){e.preventDefault();set(maxW(),true)}});
+  addEventListener("resize",()=>{const cur=parseInt(g.getAttribute("aria-valuenow"),10)||DEF;set(cur,false)});
+})();
 </script>
 </body>
 </html>
